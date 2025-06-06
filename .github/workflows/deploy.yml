@@ -23,7 +23,7 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/pr-chat-bot:latest .
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/pr-chat-bot:latest -f .docker/Dockerfile .
         docker push ${{ secrets.DOCKER_USERNAME }}/pr-chat-bot:latest
 
   deploy:

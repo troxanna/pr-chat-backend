@@ -22,6 +22,7 @@ func NewServerAdmin(
 	competencyMatrix competencyMatrix,
 ) ServerAdmin {
 	return ServerAdmin{
-		competencyMatrix:	competencyMatrix,
+		competencyMatrix: competencyMatrix,
 	}
 }
+

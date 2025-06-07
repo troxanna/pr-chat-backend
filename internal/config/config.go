@@ -24,27 +24,27 @@ type Config struct {
 
 	HTTP struct {
 		ListenAddress        string        `env:"HTTP_LISTEN_ADDRESS,notEmpty"`
-		ListenAddressPrivate string        `env:"HTTP_LISTEN_ADDRESS_PRIVATE" envDefault:":4000"`
+		ListenAddressPrivate string        `env:"HTTP_LISTEN_ADDRESS_PRIVATE" envDefault:":8080"`
 		WriteTimeout         time.Duration `env:"HTTP_WRITE_TIMEOUT" envDefault:"90s"`
 		ReadTimeout          time.Duration `env:"HTTP_READ_TIMEOUT" envDefault:"90s"`
 		IdleTimeout          time.Duration `env:"HTTP_IDLE_TIMEOUT" envDefault:"60s"`
 		ShutdownTimeout      time.Duration `env:"HTTP_SHUTDOWN_TIMEOUT" envDefault:"30s"`
 	}
 
-	JWT struct {
-		PrivateKey      string        `env:"JWT_PRIVATE_KEY,notEmpty" json:"-"` // Hide in zap logs
-		PublicKey       string        `env:"JWT_PUBLIC_KEY,notEmpty"`
-		AccessTokenTTL  time.Duration `env:"JWT_ACCESS_TOKEN_TTL" envDefault:"5m"`
-		RefreshTokenTTL time.Duration `env:"JWT_REFRESH_TOKEN_TTL" envDefault:"168h"`
-	}
+	// JWT struct {
+	// 	PrivateKey      string        `env:"JWT_PRIVATE_KEY,notEmpty" json:"-"` // Hide in zap logs
+	// 	PublicKey       string        `env:"JWT_PUBLIC_KEY,notEmpty"`
+	// 	AccessTokenTTL  time.Duration `env:"JWT_ACCESS_TOKEN_TTL" envDefault:"5m"`
+	// 	RefreshTokenTTL time.Duration `env:"JWT_REFRESH_TOKEN_TTL" envDefault:"168h"`
+	// }
 
-	Postgres struct {
-		URL             string        `env:"PG_URL, notEmpty"`
-		DSN             string        `env:"PG_DSN,notEmpty" json:"-"` // Hide in zap logs
-		MaxIdleConns    int           `env:"PG_MAX_IDLE_CONNS" envDefault:"15"`
-		MaxOpenConns    int           `env:"PG_MAX_OPEN_CONNS" envDefault:"15"`
-		ConnMaxLifetime time.Duration `env:"PG_CONN_MAX_LIFETIME" envDefault:"5m"`
-	}
+	// Postgres struct {
+	// 	URL             string        `env:"PG_URL, notEmpty"`
+	// 	DSN             string        `env:"PG_DSN,notEmpty" json:"-"` // Hide in zap logs
+	// 	MaxIdleConns    int           `env:"PG_MAX_IDLE_CONNS" envDefault:"15"`
+	// 	MaxOpenConns    int           `env:"PG_MAX_OPEN_CONNS" envDefault:"15"`
+	// 	ConnMaxLifetime time.Duration `env:"PG_CONN_MAX_LIFETIME" envDefault:"5m"`
+	// }
 
 	Log struct {
 		FieldMaxLen int `env:"LOG_FIELD_MAX_LEN" envDefault:"2000"`
@@ -64,8 +64,8 @@ type Config struct {
 	}
 
 	Telegram struct {
-		BotToken   string `env:"TG_BOT_TOKEN,notEmpty" `
-		WebhookUrl string `env:"TG_WEB HOOK_URL,notEmpty"`
+		BotToken   string `env:"TELEGRAM_BOT_TOKEN,notEmpty"`
+		WebhookUrl string `env:"TG_WEBHOOK_URL" envDefault:"-"`
 		Port       string `env:"TG_PORT" envDefault:"8697"`
 		Cert       string `env:"TG_CERTIFICATE,notEmpty"`
 	}

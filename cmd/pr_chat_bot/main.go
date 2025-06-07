@@ -15,6 +15,7 @@ func main() {
 		os.Exit(1)
 	}
 
+
 	if err = application.New("pr", cfg).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

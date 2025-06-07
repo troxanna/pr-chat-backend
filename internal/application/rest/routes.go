@@ -12,6 +12,7 @@ func RegisterRoutes(
 ) {
 	r.Route("/admin/v1", func(r chi.Router) {
 		r.Post("/matrix", handler(serverAdmin.PostAdminV1CompetencyMatrix))
+		r.Get("/matrix", handler(serverAdmin.PostAdminV1CompetencyMatrix))
 	})
 }
 

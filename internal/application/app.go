@@ -15,6 +15,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"net"
 	"errors"
+	"github.com/troxanna/pr-chat-backend/internal/db"
 )
 
 type App struct {
@@ -50,6 +51,9 @@ func (app *App) Run() error {
 
 	g, ctx := errgroup.WithContext(ctx)
 
+	db, _ := db.NewPostgres(ctx, "10.10.169.1")
+	app.postgresClient = db.Pool
+
 	app.dbCompetencyMatrix = persistence.NewDBCompetencyMatrix(app.postgresClient)
 	app.competencyMatrixService = service.NewCompetencyMatrix(app.dbCompetencyMatrix)
 
@@ -60,8 +64,6 @@ func (app *App) Run() error {
 	}
 
 	return nil
-
-
 }
 
 func (app *App) shutdown() {

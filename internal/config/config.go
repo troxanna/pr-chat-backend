@@ -12,7 +12,6 @@ type Config struct {
 	// Prometheus struct {
 	// 	ListenAddress string `env:"PROMETHEUS_LISTEN_ADDRESS" envDefault:":2112"`
 	// }
-
 	// Redis struct {
 	// 	Username           string `env:"REDIS_USERNAME"`
 	// 	Password           string `env:"REDIS_PASSWORD" json:"-"`
@@ -39,12 +38,13 @@ type Config struct {
 		RefreshTokenTTL time.Duration `env:"JWT_REFRESH_TOKEN_TTL" envDefault:"168h"`
 	}
 
-	// Postgres struct {
-	// 	DSN             string        `env:"PG_DSN,notEmpty" json:"-"` // Hide in zap logs
-	// 	MaxIdleConns    int           `env:"PG_MAX_IDLE_CONNS" envDefault:"15"`
-	// 	MaxOpenConns    int           `env:"PG_MAX_OPEN_CONNS" envDefault:"15"`
-	// 	ConnMaxLifetime time.Duration `env:"PG_CONN_MAX_LIFETIME" envDefault:"5m"`
-	// }
+	Postgres struct {
+		URL             string        `env:"PG_URL, notEmpty"`
+		DSN             string        `env:"PG_DSN,notEmpty" json:"-"` // Hide in zap logs
+		MaxIdleConns    int           `env:"PG_MAX_IDLE_CONNS" envDefault:"15"`
+		MaxOpenConns    int           `env:"PG_MAX_OPEN_CONNS" envDefault:"15"`
+		ConnMaxLifetime time.Duration `env:"PG_CONN_MAX_LIFETIME" envDefault:"5m"`
+	}
 
 	Log struct {
 		FieldMaxLen int `env:"LOG_FIELD_MAX_LEN" envDefault:"2000"`
@@ -55,7 +55,7 @@ type Config struct {
 	}
 
 	S3Storage struct {
-		Endpoint               string `env:"S3_STORAGE_ENDPOINT" envDefault:"https://storage.yandexcloud.net"`
+		Endpoint string `env:"S3_STORAGE_ENDPOINT" envDefault:"https://storage.yandexcloud.net"`
 		// SigningRegion          string `env:"S3_STORAGE_SIGNING_REGION" envDefault:"ru-central1"`
 		// AccessKeyID            string `env:"S3_STORAGE_ACCESS_KEY_ID,notEmpty"`
 		// SecretAccessKey        string `env:"S3_STORAGE_SECRET_ACCESS_KEY,notEmpty"`
@@ -63,6 +63,12 @@ type Config struct {
 		// BucketNameFile         string `env:"S3_STORAGE_BUCKET_NAME_FILE" envDefault:"file"`
 	}
 
+	Telegram struct {
+		BotToken   string `env:"TELEGRAM_BOT_TOKEN,notEmpty" `
+		WebhookUrl string `env:"TG_WEBHOOK_URL,notEmpty"`
+		Port       string `env:"TG_PORT" envDefault:"8697"`
+		Cert       string `env:"TG_CERTIFICATE,notEmpty"`
+	}
 }
 
 func Load() (Config, error) {

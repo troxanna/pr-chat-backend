@@ -31,4 +31,7 @@ jobs:
             -e HTTP_LISTEN_ADDRESS=${{ secrets.HTTP_LISTEN_ADDRESS }} \
             -e JWT_PRIVATE_KEY="${{ secrets.JWT_PRIVATE_KEY }}" \
             -e JWT_PUBLIC_KEY="${{ secrets.JWT_PUBLIC_KEY }}" \
+            -e TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }} \
+            -e TG_CERTIFICATE="${{ secrets.TG_CERTIFICATE }}" \
+            -e TG_KEY="${{ secrets.TG_KEY }}" \
             pr-chat-bot

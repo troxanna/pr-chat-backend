@@ -64,8 +64,8 @@ type Config struct {
 	}
 
 	Telegram struct {
-		BotToken   string `env:"TELEGRAM_BOT_TOKEN,notEmpty" `
-		WebhookUrl string `env:"TG_WEBHOOK_URL,notEmpty"`
+		BotToken   string `env:"TG_BOT_TOKEN,notEmpty" `
+		WebhookUrl string `env:"TG_WEB HOOK_URL,notEmpty"`
 		Port       string `env:"TG_PORT" envDefault:"8697"`
 		Cert       string `env:"TG_CERTIFICATE,notEmpty"`
 	}

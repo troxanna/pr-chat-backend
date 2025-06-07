@@ -21,4 +21,8 @@ jobs:
         run: docker build -t pr-chat-bot -f .docker//Dockerfile .
 
       - name: Run container (optional test)
-        run: docker run --rm pr-chat-bot
+        run: docker run --rm \
+            -e HTTP_LISTEN_ADDRESS="${{ secrets.HTTP_LISTEN_ADDRESS }}" \
+            -e JWT_PRIVATE_KEY="${{ secrets.JWT_PRIVATE_KEY }}" \
+            -e JWT_PUBLIC_KEY="${{ secrets.JWT_PUBLIC_KEY }}" \
+            pr-chat-bot

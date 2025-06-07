@@ -15,7 +15,7 @@ type CompetencyMatrix struct {
 	db dbCompetencyMatrix
 }
 
-func NewProjects(
+func NewCompetencyMatrix(
 	db dbCompetencyMatrix,
 ) *CompetencyMatrix {
 	return &CompetencyMatrix{
@@ -23,7 +23,7 @@ func NewProjects(
 	}
 }
 
-func (p CompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills) error {
+func (p CompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill) error {
 	fmt.Println("Hello")
 	return nil
 

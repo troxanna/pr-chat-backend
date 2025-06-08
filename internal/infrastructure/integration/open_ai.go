@@ -6,6 +6,11 @@ import (
 	"bytes"
 	"io"
 	"log"
+	"github.com/google/uuid"
+)
+
+var (
+	uid = uuid.NewString()
 )
 
 type Client struct {
@@ -26,7 +31,7 @@ func NewClient(
 	}
 }
 
-type RequestBody struct {
+type SendPromptForQuestionRequest struct {
     OperatingSystemCode int    `json:"operatingSystemCode"`
     APIKey              string `json:"apiKey"`
     UserDomainName      string `json:"userDomainName"`
@@ -35,16 +40,23 @@ type RequestBody struct {
     Message             string `json:"Message"`
 }
 
+type GetResultForQuestionRequest struct {
+    OperatingSystemCode int    `json:"operatingSystemCode"`
+    APIKey              string `json:"apiKey"`
+    DialogIdentifier    string `json:"dialogIdentifier"`
+}
+
+
 func (c Client) SendPromptForQuestion() {
 	url := "https://gpt.orionsoft.ru/api/External/PostNewRequest"
 	// url := c.baseURL
 
-    // Создаем объект с данными
-    requestData := RequestBody{
+    // Создаем объект с данными (пока не прикрутим сюда данные от бота)
+    requestData := SendPromptForQuestionRequest{
         OperatingSystemCode: 12,
         APIKey:              c.apiKey,
         UserDomainName:      "Team6QSXgoYCNNsG",
-        DialogIdentifier:    "12345",
+        DialogIdentifier:    uid,
         AIModelCode:         1,
         Message: `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSQL у сотрудника. Уровень указан как {level} по следующей шкале:
 
@@ -89,3 +101,6 @@ func (c Client) SendPromptForQuestion() {
 	log.Println("Response:", string(responseData))
 }
 
+func (c Client) GetResultForQuestion() {
+
+}

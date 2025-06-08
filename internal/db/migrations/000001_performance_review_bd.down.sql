@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS performance_reviews;
+DROP TABLE IF EXISTS user_skills;
+DROP TABLE IF EXISTS skills;
+DROP TABLE IF EXISTS group_skills;
+DROP TABLE IF EXISTS users;

@@ -166,6 +166,9 @@ func (bw *BotWrapper) CommandHandlers() {
 		for !result {
 			result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", idUser))
 		}
+		if err := c.Send(answ); err != nil {
+			return err
+		}
 		if err := c.Send(mes); err != nil {
 			return err
 		}

@@ -3,10 +3,10 @@ package bot
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"time"
 	"log"
+	"net/http"
 	"strings"
+	"time"
 
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"gopkg.in/telebot.v4"
@@ -47,6 +47,7 @@ var messageResult = `Ты выступаешь в роли эксперта, о�
 Комментарий: {одно предложение, строго по содержанию ответа}
 Ввод:  
 Ответ сотрудника: {answer}`
+
 // var clientAI integration.Client
 
 var skills = []string{"PostgreSQL", "MySQL/MariaDB", "ClickHouse", "MS SQL", "Redis", "MongoDB"}
@@ -73,10 +74,10 @@ func NewBot(token string) (*BotWrapper, error) {
 		Bot:      bot,
 		Handlers: make(map[string]HandlerFunc),
 		Client: integration.NewClient(
-				&http.Client{Transport: http.DefaultTransport},
-				"app.cfg.ClientAI.BaseURL",
-				"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-			),
+			&http.Client{Transport: http.DefaultTransport},
+			"app.cfg.ClientAI.BaseURL",
+			"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+		),
 	}
 	log.Println(bw.Client)
 	log.Println("test3")
@@ -109,9 +110,7 @@ func (bw *BotWrapper) CommandHandlers() {
 					{startButton},
 					{{
 						Text: "Launch Admin Space",
-						WebApp: &telebot.WebApp{
-							URL: "https://www.appsmith.com/",
-						},
+						URL:  "http://10.10.169.1:8000/employee-competencies",
 					}},
 				},
 			})
@@ -145,11 +144,11 @@ func (bw *BotWrapper) CommandHandlers() {
 	bw.RegisterHandler(telebot.OnVoice, func(c telebot.Context) error {
 		fmt.Println("voice Detect")
 		voice := c.Message().Voice
-	  
+
 		reader, err := bw.Bot.File(voice.MediaFile())
 		if err != nil {
-		 log.Printf("Не удалось получить файл: %v", err)
-		 return c.Send("Произошла ошибка при получении голосового сообщения.")
+			log.Printf("Не удалось получить файл: %v", err)
+			return c.Send("Произошла ошибка при получении голосового сообщения.")
 		}
 		defer reader.Close()
 		fmt.Println("voice sending")
@@ -175,14 +174,14 @@ func (bw *BotWrapper) CommandHandlers() {
 		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
 		msg, _ := bw.SendQuestion(skills[count], 2, idUser)
 		return c.Send(msg)
-	   })
+	})
 }
 
 func (bw *BotWrapper) SendQuestion(skill string, level int, userId int64) (string, error) {
 	if count == 6 {
 		return "Твой общий уровень по БД: ", nil
-	} 
-	message := strings.ReplaceAll(messageQuestion,"{skill}", skill)
+	}
+	message := strings.ReplaceAll(messageQuestion, "{skill}", skill)
 	message = strings.ReplaceAll(message, "{level}", fmt.Sprintf("%d", level))
 	bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", userId), message)
 	result := false
@@ -190,7 +189,7 @@ func (bw *BotWrapper) SendQuestion(skill string, level int, userId int64) (strin
 	for !result {
 		result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", userId))
 	}
-	count++;
+	count++
 	return mes, nil
 }
 

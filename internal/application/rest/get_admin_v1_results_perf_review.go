@@ -14,7 +14,7 @@ type ResultPerfRewiewModel struct {
 }
 
 type GroupSkillsResultModel struct {
-	Name string `json:"directions"`
+	Name string `json:"name"`
 	Average  float64  `json:"average"`
 	Skills []SkillResultModel `json:"competencies"`
 }

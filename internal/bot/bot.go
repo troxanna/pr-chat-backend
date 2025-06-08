@@ -33,11 +33,6 @@ func NewBot(token string) (*BotWrapper, error) {
 	bw := &BotWrapper{
 		Bot:      bot,
 		Handlers: make(map[string]HandlerFunc),
-		Client: integration.NewClient(
-			&http.Client{Transport: http.DefaultTransport},
-			"app.cfg.ClientAI.BaseURL",
-			"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-		),
 	}
 	log.Println(bw.Client)
 	log.Println("test3")
@@ -80,11 +75,11 @@ func (bw *BotWrapper) CommandHandlers() {
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
 		log.Println(bw.Client)
 		log.Println("test2")
-		bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", c.Update().Message.Chat.ID))
+		bw.Client.SendPromptForQuestion("12345")
 		result := false
 		mes := ""
 		for !result {
-			result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", c.Update().Message.Chat.ID))
+			result, mes = bw.Client.GetResultForQuestionRequest("12345")
 		}
 
 		return c.Send(mes)

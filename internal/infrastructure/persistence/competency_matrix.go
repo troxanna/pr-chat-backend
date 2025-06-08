@@ -39,3 +39,7 @@ func (p DBCompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups [
 
 	return nil
 }
+
+func (p DBCompetencyMatrix) GetCompetencyMatrixs(ctx context.Context) ([]entity.GroupSkills, error) {
+	return []entity.GroupSkills{}, nil
+}

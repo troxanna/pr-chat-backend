@@ -9,7 +9,7 @@ import (
 
 type competencyMatrix interface {
 	CreateCompetencyMatrix(context.Context, []entity.GroupSkills, []entity.Skill) error
-	// ListCompetencyMatrixs(context.Context) ([]entity.CompetencyMatrix, error)
+	GetCompetencyMatrixs(context.Context) ([]entity.GroupSkills, error)
 	// UpdateCompetencyMatrix(context.Context, value.PanelID, *value.PanelID, *string, *string) error
 	// DeleteCompetencyMatrix(context.Context, value.PanelID) error
 }

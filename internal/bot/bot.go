@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var clientAI integration.Client
+// var clientAI integration.Client
 
 type HandlerFunc func(c telebot.Context) error
 
@@ -47,6 +47,11 @@ type Competency struct {
 }
 
 func (bw *BotWrapper) CommandHandlers() {
+	clientAI := integration.NewClient(
+		&http.Client{Transport: http.DefaultTransport},
+		"app.cfg.ClientAI.BaseURL",
+		"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+	)
 	startButton := telebot.InlineButton{
 		Unique: "Start_PR",
 		Text:   "Launch Performance Review",
@@ -78,11 +83,6 @@ func (bw *BotWrapper) CommandHandlers() {
 }
 
 func (bw *BotWrapper) Start(ctx context.Context) error {
-	clientAI = integration.NewClient(
-		&http.Client{Transport: http.DefaultTransport},
-		"app.cfg.ClientAI.BaseURL",
-		"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-	)
 	bw.CommandHandlers()
 	errCh := make(chan error, 1)
 

@@ -58,7 +58,6 @@ type BotWrapper struct {
 	Bot      *telebot.Bot
 	Handlers map[string]HandlerFunc
 	Client   integration.Client
-	UID string
 }
 
 func NewBot(token string) (*BotWrapper, error) {
@@ -78,7 +77,6 @@ func NewBot(token string) (*BotWrapper, error) {
 				"app.cfg.ClientAI.BaseURL",
 				"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
 			),
-		UID: uuid.NewString(),
 	}
 	log.Println(bw.Client)
 	log.Println("test3")
@@ -119,20 +117,22 @@ func (bw *BotWrapper) CommandHandlers() {
 			})
 	})
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
-		defer bw.Client.CleanContextRequest(bw.UID)
+		idUser := c.Update().Message.Chat.ID
+		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
 		msg, _ := bw.SendQuestion(skills[count], 2)
 		return c.Send(msg)
 	})
 
 	bw.Bot.Handle(telebot.OnText, func(c telebot.Context) error {
-		defer bw.Client.CleanContextRequest(bw.UID)
+		idUser := c.Update().Message.Chat.ID
+		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
 		message := strings.ReplaceAll(messageResult, "{answer}", c.Update().Message.Text)
 		log.Println(c.Update().Message.Text)
-		bw.Client.SendPromptForQuestion(bw.UID, message)
+		bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", idUser), message)
 		result := false
 		mes := ""
 		for !result {
-			result, mes = bw.Client.GetResultForQuestionRequest(bw.UID)
+			result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", idUser))
 		}
 		if err := c.Send(mes); err != nil {
 			return err
@@ -158,17 +158,18 @@ func (bw *BotWrapper) CommandHandlers() {
 	// })
 }
 
-func (bw *BotWrapper) SendQuestion(skill string, level int) (string, error) {
+func (bw *BotWrapper) SendQuestion(skill string, level int, c telebot.Context) (string, error) {
 	if count == 6 {
 		return "Твой общий уровень по БД: ", nil
 	} 
 	message := strings.ReplaceAll(messageQuestion,"{skill}", skill)
 	message = strings.ReplaceAll(message, "{level}", fmt.Sprintf("%d", level))
-	bw.Client.SendPromptForQuestion(bw.UID, message)
+	idUser := c.Update().Message.Chat.ID
+	bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", idUser), message)
 	result := false
 	mes := ""
 	for !result {
-		result, mes = bw.Client.GetResultForQuestionRequest(bw.UID)
+		result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", idUser))
 	}
 	count++;
 	return mes, nil

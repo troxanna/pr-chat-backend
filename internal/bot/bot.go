@@ -3,10 +3,11 @@ package bot
 import (
 	"context"
 	"fmt"
-	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
-	"gopkg.in/telebot.v4"
 	"net/http"
 	"time"
+
+	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
+	"gopkg.in/telebot.v4"
 )
 
 // var clientAI integration.Client
@@ -16,6 +17,7 @@ type HandlerFunc func(c telebot.Context) error
 type BotWrapper struct {
 	Bot      *telebot.Bot
 	Handlers map[string]HandlerFunc
+	Client   integration.Client
 }
 
 func NewBot(token string) (*BotWrapper, error) {
@@ -30,6 +32,11 @@ func NewBot(token string) (*BotWrapper, error) {
 	bw := &BotWrapper{
 		Bot:      bot,
 		Handlers: make(map[string]HandlerFunc),
+		Client: integration.NewClient(
+			&http.Client{Transport: http.DefaultTransport},
+			"app.cfg.ClientAI.BaseURL",
+			"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+		),
 	}
 
 	return bw, nil
@@ -47,11 +54,6 @@ type Competency struct {
 }
 
 func (bw *BotWrapper) CommandHandlers() {
-	clientAI := integration.NewClient(
-		&http.Client{Transport: http.DefaultTransport},
-		"app.cfg.ClientAI.BaseURL",
-		"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-	)
 	startButton := telebot.InlineButton{
 		Unique: "Start_PR",
 		Text:   "Launch Performance Review",
@@ -71,11 +73,11 @@ func (bw *BotWrapper) CommandHandlers() {
 			})
 	})
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
-		clientAI.SendPromptForQuestion(fmt.Sprintf("%d", c.Update().Message.Chat.ID))
+		bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", c.Update().Message.Chat.ID))
 		result := false
 		mes := ""
 		for !result {
-			result, mes = clientAI.GetResultForQuestionRequest(fmt.Sprintf("%d", c.Update().Message.Chat.ID))
+			result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", c.Update().Message.Chat.ID))
 		}
 
 		return c.Send(mes)
@@ -87,6 +89,11 @@ func (bw *BotWrapper) Start(ctx context.Context) error {
 	errCh := make(chan error, 1)
 
 	go func() {
+		// clientAI = integration.NewClient(
+		// 	&http.Client{Transport: http.DefaultTransport},
+		// 	"app.cfg.ClientAI.BaseURL",
+		// 	"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+		// )
 		bw.Bot.Start()
 	}()
 

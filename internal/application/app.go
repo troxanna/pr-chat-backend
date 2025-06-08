@@ -54,12 +54,12 @@ func (app *App) Run() error {
 
 	db, _ := db.NewPostgres(ctx, "10.10.169.1")
 	app.postgresClient = db.Pool
-	fmt.Println(db)
+	log.Println(db)
 
 	app.dbCompetencyMatrix = persistence.NewDBCompetencyMatrix(app.postgresClient)
-	fmt.Println(app.dbCompetencyMatrix)
+	log.Println(app.dbCompetencyMatrix)
 	app.competencyMatrixService = service.NewCompetencyMatrix(app.dbCompetencyMatrix)
-	fmt.Println(app.competencyMatrixService)
+	log.Println(app.competencyMatrixService)
 
 	app.runHTTPServer(ctx, g)
 

@@ -48,7 +48,7 @@ jobs:
             -e TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} \
             -e TG_CERTIFICATE="${{ secrets.TG_CERTIFICATE }}" \
             -e TG_KEY="${{ secrets.TG_KEY }}" \
-            -e DB_HOST=pg-db \
+            -e DB_HOST=10.10.169.1 \
             -e DB_PORT=5432 \
             -e DB_USER=postgres \
             -e DB_PASSWORD=postgres \

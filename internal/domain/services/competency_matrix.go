@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/troxanna/pr-chat-backend/internal/domain/entity"
 )
 
 type dbCompetencyMatrix interface {
 	CreateCompetencyMatrix(context.Context, []entity.GroupSkills, []entity.Skill) error
+	GetCompetencyMatrixs(context.Context) ([]entity.GroupSkills, error)
 }
 
 type CompetencyMatrix struct {
@@ -28,6 +28,13 @@ func (p CompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []e
 	if err := p.db.CreateCompetencyMatrix(ctx, groups, skills); err != nil {
 		return fmt.Errorf("db.CreateCompetencyMatrix: %w", err)
 	}
-	log.Println("test1")
 	return nil
+}
+
+func (p CompetencyMatrix) GetCompetencyMatrixs(ctx context.Context) ([]entity.GroupSkills, error) {
+	return []entity.GroupSkills{}, nil
+	// if err := p.db.CreateCompetencyMatrix(ctx, groups, skills); err != nil {
+	// 	return fmt.Errorf("db.CreateCompetencyMatrix: %w", err)
+	// }
+	// return nil
 }

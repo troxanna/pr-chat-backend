@@ -46,6 +46,8 @@ const messageResultTemplate = `Ты выступаешь в роли экспе�
 Ввод:  
 Ответ сотрудника: {answer}`
 
+
+//ура
 var (
 	skills = []string{"PostgreSQL", "MySQL/MariaDB", "ClickHouse", "MS SQL", "Redis", "MongoDB"}
 	count  = 0

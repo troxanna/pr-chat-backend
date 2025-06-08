@@ -8,7 +8,7 @@ import (
 )
 
 type dbCompetencyMatrix interface {
-	CreateCompetencyMatrix(context.Context, []entity.GroupSkills, []entity.Skill) error
+	CreateCompetencyMatrix(context.Context, []entity.GroupSkills, []entity.Skill, []entity.Matrix) error
 	GetCompetencyMatrixs(context.Context) ([]entity.GroupSkills, error)
 }
 
@@ -24,8 +24,8 @@ func NewCompetencyMatrix(
 	}
 }
 
-func (p CompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill) error {
-	if err := p.db.CreateCompetencyMatrix(ctx, groups, skills); err != nil {
+func (p CompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill, matrixs []entity.Matrix) error {
+	if err := p.db.CreateCompetencyMatrix(ctx, groups, skills, matrixs); err != nil {
 		return fmt.Errorf("db.CreateCompetencyMatrix: %w", err)
 	}
 	return nil

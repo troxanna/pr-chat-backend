@@ -14,9 +14,10 @@ type DBCompetencyMatrix struct {
 
 func NewDBCompetencyMatrix(db *pgxpool.Pool) DBCompetencyMatrix { return DBCompetencyMatrix{db: db} }
 
-func (p DBCompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill) error {
+func (p DBCompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill, matrixs []entity.Matrix) error {
 	log.Println(groups)
 	log.Println(skills)
+	log.Println(matrixs)
 	// const query = `
 	// 	INSERT INTO projects(
 	// 		id,

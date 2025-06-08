@@ -8,6 +8,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type MatrixModel struct {
+	Name string `json:"name" validate:"required"`
+	GroupsSkills []GroupSkillsModel `json:"groups" validate:"required"`
+}
+
 type GroupSkillsModel struct {
 	Name string `json:"name" validate:"required"`
 	Description string `json:"description,omitempty"`
@@ -21,7 +26,7 @@ type SkillModel struct {
 
 
 type PostAdminCompetencyMatrixRequest struct {
-	GroupSkills []GroupSkillsModel `json:"groups" validate:"required"`
+	Matrixs []MatrixModel `json:"matrixs" validate:"required"`
 }
 
 // type PostAdminV1ProjectsJSONRequestBody = PostAdminCompetencyMatrixRequest
@@ -35,27 +40,38 @@ func (s ServerAdmin) PostAdminV1CompetencyMatrix(w http.ResponseWriter, r *http.
 	}
 	var groups []entity.GroupSkills
 	var skills []entity.Skill
+	var matrixs []entity.Matrix
 
-    for _, item := range request.GroupSkills {
-        groupID := uuid.New().String()
-        groups = append(groups, entity.GroupSkills{
-            ID:          groupID,
-            Name:        item.Name,
-            Description: item.Description,
-            Type:        item.Type,
-        })
+	for _, matrix := range request.Matrixs {
+		matrixID := uuid.New().String()
 
-        for _, s := range item.Skills {
-            skills = append(skills, entity.Skill{
-                ID:          uuid.New().String(),
-                Name:        s.Name,
-                Description: "", // если будет нужно — добавим
-                GroupID:     groupID,
-            })
-        }
-    }
+		matrixs = append(matrixs, entity.Matrix{
+			ID:   matrixID,
+			Name: matrix.Name,
+		})
 
-	if err := s.competencyMatrix.CreateCompetencyMatrix(r.Context(), groups, skills); err != nil {
+		for _, group := range matrix.GroupsSkills {
+			groupID := uuid.New().String()
+
+			groups = append(groups, entity.GroupSkills{
+				ID:          groupID,
+				Name:        group.Name,
+				Description: group.Description,
+				Type:        group.Type,
+			})
+
+			for _, s := range group.Skills {
+				skills = append(skills, entity.Skill{
+					ID:          uuid.New().String(),
+					Name:        s.Name,
+					Description: "",
+					GroupID:     groupID,
+				})
+			}
+		}
+	}
+
+	if err := s.competencyMatrix.CreateCompetencyMatrix(r.Context(), groups, skills, matrixs); err != nil {
 		return fmt.Errorf("CreateCompetencyMatrix: %w", err)
 	}
 

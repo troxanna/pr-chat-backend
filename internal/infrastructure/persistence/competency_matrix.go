@@ -15,6 +15,7 @@ type DBCompetencyMatrix struct {
 func NewDBCompetencyMatrix(db *pgxpool.Pool) DBCompetencyMatrix { return DBCompetencyMatrix{db: db} }
 
 func (p DBCompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill) error {
+	log.Println("test")
 	log.Println(groups)
 	log.Println(skills)
 	// const query = `

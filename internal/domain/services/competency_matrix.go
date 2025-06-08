@@ -26,11 +26,8 @@ func NewCompetencyMatrix(
 
 func (p CompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill) error {
 	if err := p.db.CreateCompetencyMatrix(ctx, groups, skills); err != nil {
-		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			return err
-		}
 		return fmt.Errorf("db.CreateCompetencyMatrix: %w", err)
 	}
-
+	log.Println("test1")
 	return nil
 }

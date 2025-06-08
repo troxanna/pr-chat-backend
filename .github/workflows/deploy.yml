@@ -18,11 +18,11 @@ jobs:
           echo "HTTP_LISTEN_ADDRESS=${{ secrets.HTTP_LISTEN_ADDRESS }}" > .env
           echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
 
-      - name: Log in to Docker Hub
-        run: |
-          mkdir -p ~/.docker-temp-config
-          echo '{"credsStore":""}' > ~/.docker-temp-config/config.json
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      # - name: Log in to Docker Hub
+      #   run: |
+      #     mkdir -p ~/.docker-temp-config
+      #     echo '{"credsStore":""}' > ~/.docker-temp-config/config.json
+      #     echo "${{ secrets.DOCKER_PASSWORD }}" | DOCKER_CONFIG=~/.docker-temp-config docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Stop and remove running containers
         run: docker compose down || true

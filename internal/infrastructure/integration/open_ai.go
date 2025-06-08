@@ -167,7 +167,7 @@ func (c Client) GetResultForQuestionRequest(uid string) {
 		panic(err)
 	}
 
-	log.Println(responseData)
+	log.Println(string(responseData))
 
 	var result FullResponse
 

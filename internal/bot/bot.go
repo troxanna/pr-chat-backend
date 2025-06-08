@@ -178,6 +178,7 @@ func (bw *BotWrapper) CommandHandlers() {
 
 func (bw *BotWrapper) SendQuestion(level int, userId int64) (string, error) {
 	if count == 6 {
+		count = 0
 		return "Твой уровень по группе компетенций Базы данных: 3.2", nil
 	}
 	message := strings.ReplaceAll(messageQuestion, "{skill}", skills[count])

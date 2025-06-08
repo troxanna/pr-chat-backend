@@ -120,9 +120,6 @@ func (bw *BotWrapper) CommandHandlers() {
 	})
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
 		defer bw.Client.CleanContextRequest(bw.UID)
-		if count == 6 {
-			return c.Send("Твой общий уровень по БД 2")
-		} 
 		msg, _ := bw.SendQuestion(skills[count], 2)
 		return c.Send(msg)
 	})
@@ -162,6 +159,9 @@ func (bw *BotWrapper) CommandHandlers() {
 }
 
 func (bw *BotWrapper) SendQuestion(skill string, level int) (string, error) {
+	if count == 6 {
+		return "Твой общий уровень по БД: ", nil
+	} 
 	message := strings.ReplaceAll(messageQuestion,"{skill}", skill)
 	message = strings.ReplaceAll(message, "{level}", fmt.Sprintf("%d", level))
 	bw.Client.SendPromptForQuestion(bw.UID, message)

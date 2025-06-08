@@ -142,20 +142,37 @@ func (bw *BotWrapper) CommandHandlers() {
 		return c.Send(msg)
 	})
 
-	// bw.Bot.Handle(telebot.OnAudio, func(c telebot.Context) error {
-	// 	uid := uuid.NewString()
-	// 	defer bw.Client.CleanContextRequest(uid)
-	// 	log.Println(bw.Client)
-	// 	log.Println("test2")
-	// 	bw.Client.SendPromptForQuestion(uid)
-	// 	result := false
-	// 	mes := ""
-	// 	for !result {
-	// 		result, mes = bw.Client.GetResultForQuestionRequest(uid)
-	// 	}
-		
-	// 	return c.Send(mes)
-	// })
+	bw.RegisterHandler(telebot.OnVoice, func(c telebot.Context) error {
+		fmt.Println("voice Detect")
+		voice := c.Message().Voice
+	  
+		reader, err := bw.Bot.File(voice.MediaFile())
+		if err != nil {
+		 log.Printf("Не удалось получить файл: %v", err)
+		 return c.Send("Произошла ошибка при получении голосового сообщения.")
+		}
+		defer reader.Close()
+		fmt.Println("voice sending")
+		answ, err := sendVoiceInWhisper(reader, voice.FileID+".ogg")
+		if err != nil {
+			log.Printf("Ошибка отправки на сервис: %v", err)
+			return c.Send("Ошибка при отправке голосового сообщения.")
+		}
+		idUser := c.Chat().ID
+		message := strings.ReplaceAll(messageResult, "{answer}", answ)
+		bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", idUser), message)
+		result := false
+		mes := ""
+		for !result {
+			result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", idUser))
+		}
+		if err := c.Send(mes); err != nil {
+			return err
+		}
+		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
+		msg, _ := bw.SendQuestion(skills[count], 2, idUser)
+		return c.Send(msg)
+	   })
 }
 
 func (bw *BotWrapper) SendQuestion(skill string, level int, userId int64) (string, error) {

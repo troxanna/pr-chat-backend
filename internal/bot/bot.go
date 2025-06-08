@@ -96,6 +96,8 @@ func (bw *BotWrapper) CommandHandlers() {
 				{{Text: "Launch Admin Space", URL: "http://10.10.169.1:8000/employee-competencies"}},
 			},
 		}
+		count = 0
+        bw.Client.CleanContextRequest(fmt.Sprintf("%d", c.Chat().ID))
 		return c.Send("Добро пожаловать, для того чтобы начать Performance Review", markup)
 	})
 

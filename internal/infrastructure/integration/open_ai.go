@@ -2,6 +2,10 @@ package integration
 
 import (
 	"net/http"
+	"encoding/json"
+	"bytes"
+	"io"
+	"log"
 )
 
 type Client struct {
@@ -22,7 +26,66 @@ func NewClient(
 	}
 }
 
-func (c Client) sendPromptForQuestion() {
+type RequestBody struct {
+    OperatingSystemCode int    `json:"operatingSystemCode"`
+    APIKey              string `json:"apiKey"`
+    UserDomainName      string `json:"userDomainName"`
+    DialogIdentifier    string `json:"dialogIdentifier"`
+    AIModelCode         int    `json:"aiModelCode"`
+    Message             string `json:"Message"`
+}
+
+func (c Client) SendPromptForQuestion() {
+	url := "https://gpt.orionsoft.ru/api/External/PostNewRequest"
+	// url := c.baseURL
+
+    // Создаем объект с данными
+    requestData := RequestBody{
+        OperatingSystemCode: 12,
+        APIKey:              c.apiKey,
+        UserDomainName:      "Team6QSXgoYCNNsG",
+        DialogIdentifier:    "12345",
+        AIModelCode:         1,
+        Message: `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSQL у сотрудника. Уровень указан как {level} по следующей шкале:
+
+0 — Нет желания изучать
+1 — Нет экспертизы. Не изучал и не применял на практике
+2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
+3 — Хорошая экспертиза. Регулярно применяет на практике
+4 — Эксперт. Знает тонкости, делится лайфхаками
+5 — Гуру. Готов выступать на конференциях
+
+Построй вопрос так, чтобы он был релевантен именно для уровня 3 и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.`,
+    }
+
+    // Сериализация структуры в JSON
+    jsonData, err := json.Marshal(requestData)
+    if err != nil {
+        panic(err)
+    }
+
+    // Создание POST-запроса
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+    if err != nil {
+        panic(err)
+    }
+    req.Header.Set("Content-Type", "application/json")
+
+    // Отправка запроса
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    // Чтение и вывод ответа
+	responseData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
 	
+	log.Println("Status:", resp.Status)
+	log.Println("Response:", string(responseData))
 }
 

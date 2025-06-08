@@ -16,6 +16,7 @@ import (
 	"github.com/troxanna/pr-chat-backend/internal/config"
 	"github.com/troxanna/pr-chat-backend/internal/db"
 	"github.com/troxanna/pr-chat-backend/internal/domain/services"
+	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/persistence"
 	"golang.org/x/sync/errgroup"
 )
@@ -26,6 +27,7 @@ type App struct {
 	cfg            config.Config
 	deferred       []func()
 	postgresClient *pgxpool.Pool
+	clientAI       integration.Client
 
 	dbCompetencyMatrix      persistence.DBCompetencyMatrix
 	competencyMatrixService *service.CompetencyMatrix
@@ -59,6 +61,12 @@ func (app *App) Run() error {
 	app.postgresClient = db.Pool
 	log.Println(db)
 
+	app.clientAI = integration.NewClient(
+		&http.Client{Transport: http.DefaultTransport},
+		"app.cfg.ClientAI.BaseURL",
+		"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+	)
+
 	app.dbCompetencyMatrix = persistence.NewDBCompetencyMatrix(app.postgresClient)
 	log.Println(app.dbCompetencyMatrix)
 	app.competencyMatrixService = service.NewCompetencyMatrix(app.dbCompetencyMatrix)
@@ -80,7 +88,9 @@ func (app *App) shutdown() {
 }
 
 func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {
+
 	app.httpServer = app.newHTTPServer(ctx)
+	app.clientAI.SendPromptForQuestion()
 
 	g.Go(func() error {
 		go func() {

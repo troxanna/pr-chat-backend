@@ -66,6 +66,11 @@ type Config struct {
 	Telegram struct {
 		BotToken string `env:"TELEGRAM_BOT_TOKEN,notEmpty"`
 	}
+
+	// ClientAI struct {
+	// 	BaseURL string `env:"AI_URL,notEmpty"`
+	// 	APIKey string `env:"AI_KEY,notEmpty"`
+	// }
 }
 
 func Load() (Config, error) {

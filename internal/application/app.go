@@ -96,7 +96,7 @@ func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {
 	log.Println(uid)
 	app.clientAI.SendPromptForQuestion(uid)
 	for !result {
-		result = app.clientAI.GetResultForQuestionRequest(uid)
+		result, _ = app.clientAI.GetResultForQuestionRequest(uid)
 	} 
 	app.clientAI.CleanContextRequest(uid)
 

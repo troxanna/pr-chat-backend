@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+var clientAI integration.Client
+
 type HandlerFunc func(c telebot.Context) error
 
 type BotWrapper struct {
@@ -64,11 +66,6 @@ func (bw *BotWrapper) CommandHandlers() {
 			})
 	})
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
-		clientAI := integration.NewClient(
-			&http.Client{Transport: http.DefaultTransport},
-			"app.cfg.ClientAI.BaseURL",
-			"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-		)
 		clientAI.SendPromptForQuestion(fmt.Sprintf("%d", c.Update().Message.Chat.ID))
 		result := false
 		mes := ""
@@ -81,6 +78,11 @@ func (bw *BotWrapper) CommandHandlers() {
 }
 
 func (bw *BotWrapper) Start(ctx context.Context) error {
+	clientAI = integration.NewClient(
+		&http.Client{Transport: http.DefaultTransport},
+		"app.cfg.ClientAI.BaseURL",
+		"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+	)
 	bw.CommandHandlers()
 	errCh := make(chan error, 1)
 

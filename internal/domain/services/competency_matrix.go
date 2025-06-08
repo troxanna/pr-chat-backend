@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
-	"strings"
+	"log"
 
 	"github.com/troxanna/pr-chat-backend/internal/domain/entity"
 )

@@ -119,7 +119,7 @@ func (bw *BotWrapper) CommandHandlers() {
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
 		idUser := c.Update().Message.Chat.ID
 		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
-		msg, _ := bw.SendQuestion(skills[count], 2)
+		msg, _ := bw.SendQuestion(skills[count], 2, c)
 		return c.Send(msg)
 	})
 
@@ -138,7 +138,7 @@ func (bw *BotWrapper) CommandHandlers() {
 			return err
 		}
 
-		msg, _ := bw.SendQuestion(skills[count], 2)
+		msg, _ := bw.SendQuestion(skills[count], 2, c)
 		return c.Send(msg)
 	})
 

@@ -31,6 +31,12 @@ func NewClient(
 	}
 }
 
+type CompleteSessionRequest struct {
+    OperatingSystemCode int    `json:"operatingSystemCode"`
+    APIKey              string `json:"apiKey"`
+    DialogIdentifier    string `json:"dialogIdentifier"`
+}
+
 type SendPromptForQuestionRequest struct {
     OperatingSystemCode int    `json:"operatingSystemCode"`
     APIKey              string `json:"apiKey"`
@@ -101,6 +107,81 @@ func (c Client) SendPromptForQuestion() {
 	log.Println("Response:", string(responseData))
 }
 
-func (c Client) GetResultForQuestion() {
+func (c Client) GetResultForQuestionRequest() {
+	url := "https://gpt.orionsoft.ru/api/External/GetNewResponse"
+
+    // Данные запроса
+    requestData := GetResultForQuestionRequest{
+        OperatingSystemCode: 12,
+        APIKey:              "OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+        DialogIdentifier:    uid,
+    }
+
+	jsonData, err := json.Marshal(requestData)
+    if err != nil {
+        panic(err)
+    }
+
+    // Создание HTTP-запроса
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+    if err != nil {
+        panic(err)
+    }
+    req.Header.Set("Content-Type", "application/json")
+
+    // Отправка запроса
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    // Чтение ответа
+    responseData, err := io.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+
+    log.Println("Status:", resp.Status)
+    log.Println("Response:", string(responseData))
+
+}
+
+func (c Client) CleanContextRequest() {
+	url := "https://gpt.orionsoft.ru/api/External/CompleteSession"
+
+    // Данные запроса
+    requestData := CompleteSessionRequest{
+        OperatingSystemCode: 12,
+        APIKey:              "OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+        DialogIdentifier:    uid,
+    }
+
+    jsonData, err := json.Marshal(requestData)
+    if err != nil {
+        panic(err)
+    }
+
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+    if err != nil {
+        panic(err)
+    }
+    req.Header.Set("Content-Type", "application/json")
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+
+	log.Println("Status:", resp.Status)
+    log.Println("Response:", string(body))
 
 }

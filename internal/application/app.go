@@ -91,6 +91,8 @@ func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {
 
 	app.httpServer = app.newHTTPServer(ctx)
 	app.clientAI.SendPromptForQuestion()
+	app.clientAI.GetResultForQuestionRequest()
+	app.clientAI.CleanContextRequest()
 
 	g.Go(func() error {
 		go func() {

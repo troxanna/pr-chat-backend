@@ -119,12 +119,12 @@ func (bw *BotWrapper) CommandHandlers() {
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
 		idUser := c.Update().Message.Chat.ID
 		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
-		msg, _ := bw.SendQuestion(skills[count], 2, c)
+		msg, _ := bw.SendQuestion(skills[count], 2, idUser)
 		return c.Send(msg)
 	})
 
 	bw.Bot.Handle(telebot.OnText, func(c telebot.Context) error {
-		idUser := c.Update().Message.Chat.ID
+		idUser := c.Chat().ID
 		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
 		message := strings.ReplaceAll(messageResult, "{answer}", c.Update().Message.Text)
 		log.Println(c.Update().Message.Text)
@@ -138,7 +138,7 @@ func (bw *BotWrapper) CommandHandlers() {
 			return err
 		}
 
-		msg, _ := bw.SendQuestion(skills[count], 2, c)
+		msg, _ := bw.SendQuestion(skills[count], 2, idUser)
 		return c.Send(msg)
 	})
 
@@ -158,18 +158,17 @@ func (bw *BotWrapper) CommandHandlers() {
 	// })
 }
 
-func (bw *BotWrapper) SendQuestion(skill string, level int, c telebot.Context) (string, error) {
+func (bw *BotWrapper) SendQuestion(skill string, level int, userId int64) (string, error) {
 	if count == 6 {
 		return "Твой общий уровень по БД: ", nil
 	} 
 	message := strings.ReplaceAll(messageQuestion,"{skill}", skill)
 	message = strings.ReplaceAll(message, "{level}", fmt.Sprintf("%d", level))
-	idUser := c.Update().Message.Chat.ID
-	bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", idUser), message)
+	bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", userId), message)
 	result := false
 	mes := ""
 	for !result {
-		result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", idUser))
+		result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", userId))
 	}
 	count++;
 	return mes, nil

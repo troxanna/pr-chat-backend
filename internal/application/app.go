@@ -1,41 +1,41 @@
 package application
 
 import (
-	"net/http"
-	"github.com/troxanna/pr-chat-backend/internal/config"
-	"github.com/troxanna/pr-chat-backend/internal/application/rest"
 	"context"
+	"errors"
+	"fmt"
+	"log"
+	"net"
+	"net/http"
 	"os/signal"
 	"syscall"
-	"golang.org/x/sync/errgroup"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/troxanna/pr-chat-backend/internal/application/rest"
+	"github.com/troxanna/pr-chat-backend/internal/config"
+	"github.com/troxanna/pr-chat-backend/internal/db"
 	"github.com/troxanna/pr-chat-backend/internal/domain/services"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/persistence"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"fmt"
-	"github.com/go-chi/chi/v5"
-	"net"
-	"errors"
-	"github.com/troxanna/pr-chat-backend/internal/db"
-	"log"
+	"golang.org/x/sync/errgroup"
 )
 
 type App struct {
-	name string
-	httpServer *http.Server
-	cfg      config.Config
-	deferred []func()
+	name           string
+	httpServer     *http.Server
+	cfg            config.Config
+	deferred       []func()
 	postgresClient *pgxpool.Pool
 
-	dbCompetencyMatrix persistence.DBCompetencyMatrix
+	dbCompetencyMatrix      persistence.DBCompetencyMatrix
 	competencyMatrixService *service.CompetencyMatrix
-
 }
 
 func New(name string, cfg config.Config) *App {
 	//nolint:exhaustruct
 	return &App{
-		name:    name,
-		cfg:     cfg,
+		name: name,
+		cfg:  cfg,
 	}
 }
 
@@ -52,7 +52,7 @@ func (app *App) Run() error {
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	db, err := db.NewPostgres(ctx, "10.10.169.1")
+	db, err := db.NewPostgres(ctx, "10.10.169.1:5432")
 	if err != nil {
 		log.Fatalf("failed to connect to DB: %v", err)
 	}
@@ -105,7 +105,6 @@ func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {
 		return nil
 	})
 }
-
 
 func (app *App) newHTTPServer(ctx context.Context) *http.Server {
 	router := chi.NewRouter()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"log"
 
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"gopkg.in/telebot.v4"
@@ -38,6 +39,8 @@ func NewBot(token string) (*BotWrapper, error) {
 			"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
 		),
 	}
+	log.Println(bw.Client)
+	log.Println("test3")
 
 	return bw, nil
 }
@@ -54,6 +57,8 @@ type Competency struct {
 }
 
 func (bw *BotWrapper) CommandHandlers() {
+	log.Println(bw.Client)
+	log.Println("test1")
 	startButton := telebot.InlineButton{
 		Unique: "Start_PR",
 		Text:   "Launch Performance Review",
@@ -73,6 +78,8 @@ func (bw *BotWrapper) CommandHandlers() {
 			})
 	})
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
+		log.Println(bw.Client)
+		log.Println("test2")
 		bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", c.Update().Message.Chat.ID))
 		result := false
 		mes := ""

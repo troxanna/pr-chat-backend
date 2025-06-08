@@ -3,7 +3,7 @@ package bot
 import (
 	"context"
 	// "fmt"
-	// "net/http"
+	"net/http"
 	"time"
 	"log"
 
@@ -33,6 +33,11 @@ func NewBot(token string) (*BotWrapper, error) {
 	bw := &BotWrapper{
 		Bot:      bot,
 		Handlers: make(map[string]HandlerFunc),
+		Client: integration.NewClient(
+				&http.Client{Transport: http.DefaultTransport},
+				"app.cfg.ClientAI.BaseURL",
+				"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+			),
 	}
 	log.Println(bw.Client)
 	log.Println("test3")

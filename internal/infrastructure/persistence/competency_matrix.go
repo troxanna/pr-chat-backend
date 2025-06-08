@@ -1,8 +1,10 @@
 package persistence
 
 import (
-	"github.com/jackc/pgx/v5/pgxpool"
 	"context"
+	"log"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/troxanna/pr-chat-backend/internal/domain/entity"
 )
 
@@ -13,6 +15,8 @@ type DBCompetencyMatrix struct {
 func NewDBCompetencyMatrix(db *pgxpool.Pool) DBCompetencyMatrix { return DBCompetencyMatrix{db: db} }
 
 func (p DBCompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill) error {
+	log.Println(groups)
+	log.Println(skills)
 	// const query = `
 	// 	INSERT INTO projects(
 	// 		id,

@@ -24,7 +24,7 @@ type SkillModel struct {
 	Name string `json:"name"`
 }
 
-
+// fix for one item
 type PostAdminCompetencyMatrixRequest struct {
 	Matrixs []MatrixModel `json:"matrixs" validate:"required"`
 }

@@ -3,20 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/troxanna/pr-chat-backend/internal/application"
 	"github.com/troxanna/pr-chat-backend/internal/bot"
-	"github.com/troxanna/pr-chat-backend/internal/config"
-	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
-	cfg, err := config.Load()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	//cfg, err := config.Load()
+	//if err != nil {
+	//	fmt.Fprintln(os.Stderr, err)
+	//	os.Exit(1)
+	//}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
@@ -40,10 +37,11 @@ func main() {
 			fmt.Println("Получен сигнал завершения, завершаем main")
 			return
 		default:
-			if err = application.New("pr", cfg).Run(); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			//if err = application.New("pr", cfg).Run(); err != nil {
+			//	fmt.Fprintln(os.Stderr, err)
+			//	os.Exit(1)
+			//}
+			fmt.Println("ПУ ПУ ПУ")
 		}
 	}
 

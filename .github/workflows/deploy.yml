@@ -1,4 +1,4 @@
-name: Build Docker Image
+name: Build and Run App with PostgreSQL
 
 on:
   push:
@@ -26,20 +26,37 @@ jobs:
           docker rm -f pr-chat-bot || true
           docker rm -f pg-db || true
 
+      - name: Create Docker network
+        run: docker network create pr-chat-net || true
+
       - name: Run PostgreSQL container
         run: |
           docker run -d \
             --name pg-db \
+            --network pr-chat-net \
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=postgres \
             -e POSTGRES_DB=app_db \
             -p 5432:5432 \
             postgres:15
 
-      - name: Run container in background
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..20}; do
+            if docker exec pg-db pg_isready -U postgres > /dev/null 2>&1; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "PostgreSQL not ready yet, waiting..."
+            sleep 2
+          done
+
+      - name: Run app container
         run: |
           docker run -d \
             --name pr-chat-bot \
+            --network pr-chat-net \
             -p 8080:8080 \
             -p 8697:8697 \
             -e HTTP_LISTEN_ADDRESS=${{ secrets.HTTP_LISTEN_ADDRESS }} \

@@ -47,13 +47,14 @@ func (bw *BotWrapper) CommandHandlers() {
 				},
 			})
 	})
+
+	bw.RegisterHandler(telebot.OnAudio, func(c telebot.Context) error {
+
+	})
 }
 
-// Start запускает бота и блокирует до завершения контекста.
 func (bw *BotWrapper) Start(ctx context.Context) error {
 	bw.CommandHandlers()
-
-	// Запускаем бота в отдельной горутине, чтобы можно было отменить через ctx
 	errCh := make(chan error, 1)
 
 	go func() {

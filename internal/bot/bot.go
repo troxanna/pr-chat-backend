@@ -47,10 +47,6 @@ func (bw *BotWrapper) CommandHandlers() {
 				},
 			})
 	})
-
-	bw.RegisterHandler(telebot.OnAudio, func(c telebot.Context) error {
-
-	})
 }
 
 func (bw *BotWrapper) Start(ctx context.Context) error {
@@ -63,12 +59,8 @@ func (bw *BotWrapper) Start(ctx context.Context) error {
 
 	select {
 	case <-ctx.Done():
-		// контекст отменён — корректно останавливаем бота, если возможно
-		// telebot.v4 не имеет метода Stop, поэтому просто возвращаем nil
-		// (бот прервётся, когда программа завершится)
 		return nil
 	case err := <-errCh:
-		// бот завершился с ошибкой
 		return err
 	}
 }

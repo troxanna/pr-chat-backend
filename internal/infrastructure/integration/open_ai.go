@@ -82,7 +82,7 @@ func (c Client) SendPromptForQuestion(uid string) {
 	// Создаем объект с данными (пока не прикрутим сюда данные от бота)
 	requestData := SendPromptForQuestionRequest{
 		OperatingSystemCode: 12,
-		APIKey:              c.apiKey,
+		APIKey:              "OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
 		UserDomainName:      "Team6QSXgoYCNNsG",
 		DialogIdentifier:    uid,
 		AIModelCode:         1,

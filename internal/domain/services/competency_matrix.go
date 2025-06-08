@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/troxanna/pr-chat-backend/internal/domain/entity"
 )
@@ -24,24 +25,12 @@ func NewCompetencyMatrix(
 }
 
 func (p CompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill) error {
-	fmt.Println("Hello")
+	if err := p.db.CreateCompetencyMatrix(ctx, groups, skills); err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return err
+		}
+		return fmt.Errorf("db.CreateCompetencyMatrix: %w", err)
+	}
+
 	return nil
-
-	// if err := p.db.CreateProject(ctx, entity.Project{ //nolint:exhaustruct
-	// 	ProjectID:   value.ProjectID(xid.New().String()),
-	// 	PanelID:     panelID,
-	// 	Name:        name,
-	// 	Description: description,
-	// 	CreatedAt:   time.Now().UTC(),
-	// }); err != nil {
-	// 	if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-	// 		return failure.NewInvalidArgumentErrorFromError(
-	// 			fmt.Errorf("db.CreateProject: %w", err),
-	// 			failure.WithDescription("Already exist"))
-	// 	}
-
-	// 	return fmt.Errorf("db.CreateProject: %w", err)
-	// }
-
-	// return nil
 }

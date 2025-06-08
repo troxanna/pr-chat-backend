@@ -9,6 +9,7 @@ import (
 
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"gopkg.in/telebot.v4"
+	"github.com/google/uuid"
 )
 
 // var clientAI integration.Client
@@ -78,15 +79,17 @@ func (bw *BotWrapper) CommandHandlers() {
 			})
 	})
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
+		uid := uuid.NewString()
+		defer bw.Client.CleanContextRequest(uid)
 		log.Println(bw.Client)
 		log.Println("test2")
-		bw.Client.SendPromptForQuestion("12345")
+		bw.Client.SendPromptForQuestion(uid)
 		result := false
 		mes := ""
 		for !result {
-			result, mes = bw.Client.GetResultForQuestionRequest("12345")
+			result, mes = bw.Client.GetResultForQuestionRequest(uid)
 		}
-
+		
 		return c.Send(mes)
 	})
 }

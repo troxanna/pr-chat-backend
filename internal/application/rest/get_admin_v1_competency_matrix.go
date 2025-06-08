@@ -8,6 +8,11 @@ import (
 	// "github.com/google/uuid"
 )
 
+type MatrixModel struct {
+	Name string `json:"name" validate:"required"`
+	GroupsSkills []GroupSkillsModel `json:"groups" validate:"required"`
+}
+
 type GetAdminCompetencyMatrixResponse struct {
 	Matrixs []MatrixModel `json:"matrixs" validate:"required"`
 }

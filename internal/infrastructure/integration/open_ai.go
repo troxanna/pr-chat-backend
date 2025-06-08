@@ -13,6 +13,35 @@ var (
 	uid = uuid.NewString()
 )
 
+type ContextItem struct {
+	RequestMessage  string `json:"requestMessage"`
+	RequestTime     string `json:"requestTime"`
+	ResponseMessage string `json:"responseMessage"`
+	ResponseTime    string `json:"responseTime"`
+}
+
+type Data struct {
+	UserCrocCode     string        `json:"userCrocCode"`
+	DialogIdentifier string        `json:"dialogIdentifier"`
+	AIModelCode      int           `json:"aiModelCode"`
+	AIModelName      string        `json:"aiModelName"`
+	Warning          int           `json:"warning"`
+	LastMessage      string        `json:"lastMessage"`
+	LastResponseTime string        `json:"lastResponseTime"`
+	Context          []ContextItem `json:"context"`
+}
+
+type Status struct {
+	IsSuccess   bool   `json:"isSuccess"`
+	Description string `json:"description"`
+}
+
+type FullResponse struct {
+	Status Status `json:"status"`
+	Data   Data   `json:"data"`
+}
+
+
 type Client struct {
 	httpClient *http.Client
 	baseURL    string
@@ -64,7 +93,7 @@ func (c Client) SendPromptForQuestion() {
         UserDomainName:      "Team6QSXgoYCNNsG",
         DialogIdentifier:    uid,
         AIModelCode:         1,
-        Message: `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSQL у сотрудника. Уровень указан как {level} по следующей шкале:
+        Message: `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSQL у сотрудника. Уровень указан как 2 по следующей шкале:
 
 0 — Нет желания изучать
 1 — Нет экспертизы. Не изучал и не применял на практике
@@ -143,8 +172,27 @@ func (c Client) GetResultForQuestionRequest() {
         panic(err)
     }
 
-    log.Println("Status:", resp.Status)
-    log.Println("Response:", string(responseData))
+	var result FullResponse
+
+	if err := json.Unmarshal(responseData, &result); err != nil {
+		log.Printf("Ошибка разбора JSON: %v", err)
+		log.Println("Сырой ответ:", string(responseData))
+		return
+	}
+
+	log.Println("✅ Успешность:", result.Status.IsSuccess)
+	log.Println("📄 Описание:", result.Status.Description)
+	log.Println("👤 UserCrocCode:", result.Data.UserCrocCode)
+	log.Println("🧾 DialogIdentifier:", result.Data.DialogIdentifier)
+	log.Println("🤖 Модель:", result.Data.AIModelName)
+	log.Println("🗨️ Последнее сообщение:", result.Data.LastMessage)
+	log.Println("⏱ Время последнего ответа:", result.Data.LastResponseTime)
+	log.Println("📚 Контекст сообщений:")
+
+	for i, item := range result.Data.Context {
+		log.Printf("  [%d] ▶️ Запрос (%s): %s", i+1, item.RequestTime, item.RequestMessage)
+		log.Printf("      💬 Ответ  (%s): %s", item.ResponseTime, item.ResponseMessage)
+	}
 
 }
 

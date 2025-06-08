@@ -24,7 +24,7 @@ type Config struct {
 
 	HTTP struct {
 		ListenAddress        string        `env:"HTTP_LISTEN_ADDRESS,notEmpty"`
-		ListenAddressPrivate string        `env:"HTTP_LISTEN_ADDRESS_PRIVATE" envDefault:":8080"`
+		ListenAddressPrivate string        `env:"HTTP_LISTEN_ADDRESS_PRIVATE" envDefault:"0.0.0.0:8080"`
 		WriteTimeout         time.Duration `env:"HTTP_WRITE_TIMEOUT" envDefault:"90s"`
 		ReadTimeout          time.Duration `env:"HTTP_READ_TIMEOUT" envDefault:"90s"`
 		IdleTimeout          time.Duration `env:"HTTP_IDLE_TIMEOUT" envDefault:"60s"`

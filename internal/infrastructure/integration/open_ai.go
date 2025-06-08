@@ -9,27 +9,6 @@ import (
 )
 //test
 
-var messageQuestion = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSql у сотрудника. Уровень указан как 2 по следующей шкале:
-0 — Нет желания изучать
-1 — Нет экспертизы. Не изучал и не применял на практике
-2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
-3 — Хорошая экспертиза. Регулярно применяет на практике
-4 — Эксперт. Знает тонкости, делится лайфхаками
-5 — Гуру. Готов выступать на конференциях
-Построй вопрос так, чтобы он был релевантен именно для уровня 2 и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.
-)`
-
-var messageResult = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSQL у сотрудника. Уровень указан как 2 по следующей шкале:
-
-0 — Нет желания изучать
-1 — Нет экспертизы. Не изучал и не применял на практике
-2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
-3 — Хорошая экспертиза. Регулярно применяет на практике
-4 — Эксперт. Знает тонкости, делится лайфхаками
-5 — Гуру. Готов выступать на конференциях
-
-Построй вопрос так, чтобы он был релевантен именно для уровня 3 и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.`
-
 type ContextItem struct {
 	RequestMessage  string `json:"requestMessage"`
 	RequestTime     string `json:"requestTime"`
@@ -97,7 +76,7 @@ type GetResultForQuestionRequest struct {
 	DialogIdentifier    string `json:"dialogIdentifier"`
 }
 
-func (c Client) SendPromptForQuestion(uid string) {
+func (c Client) SendPromptForQuestion(uid string, message string) {
 	url := "https://gpt.orionsoft.ru/api/External/PostNewRequest"
 	// url := c.baseURL
 
@@ -108,7 +87,7 @@ func (c Client) SendPromptForQuestion(uid string) {
 		UserDomainName:      "Team6QSXgoYCNNsG",
 		DialogIdentifier:    uid,
 		AIModelCode:         1,
-		Message:             messageQuestion, //messageResult
+		Message:             message, //messageResult
 	}
 
 	// Сериализация структуры в JSON

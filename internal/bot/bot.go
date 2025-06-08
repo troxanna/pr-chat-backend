@@ -10,7 +10,7 @@ import (
 
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"gopkg.in/telebot.v4"
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 )
 
 var messageQuestion = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции {skill} у сотрудника. Уровень указан как {level} по шкале от 0 до 5:

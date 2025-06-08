@@ -9,36 +9,44 @@ import (
 )
 
 type GetAdminCompetencyMatrixResponse struct {
-	GroupSkills []GroupSkillsModel `json:"groups" validate:"required"`
+	Matrixs []MatrixModel `json:"matrixs" validate:"required"`
 }
 
 func (s ServerAdmin) GetAdminV1CompetencyMatrix(w http.ResponseWriter, r *http.Request) error {
 	response := GetAdminCompetencyMatrixResponse{
-		GroupSkills: []GroupSkillsModel{
+		Matrixs: []MatrixModel{
 			{
-				Name:        "Automation",
-				Description: "Инструменты для автоматизации",
-				Type:        "hard",
-				Skills: []SkillModel{
-					{Name: "Ansible"},
-					{Name: "Terraform"},
-					{Name: "Gitlab-CI"},
+				Name: "DevOps Competency Matrix",
+				GroupsSkills: []GroupSkillsModel{
+					{
+						Name:        "Automation",
+						Description: "Инструменты для автоматизации",
+						Type:        "hard",
+						Skills: []SkillModel{
+							{Name: "Ansible"},
+							{Name: "Terraform"},
+							{Name: "Gitlab-CI"},
+						},
+					},
+					{
+						Name:        "Monitoring",
+						Description: "Средства мониторинга и логирования",
+						Type:        "hard",
+						Skills: []SkillModel{
+							{Name: "Prometheus"},
+							{Name: "Grafana"},
+							{Name: "Zabbix"},
+						},
+					},
+					{
+						Name: "Soft Skills",
+						Type: "soft",
+						Skills: []SkillModel{
+							{Name: "Коммуникация"},
+							{Name: "Презентация задач"},
+						},
+					},
 				},
-			},
-			{
-				Name:        "Monitoring",
-				Description: "Средства мониторинга и логирования",
-				Type:        "hard",
-				Skills: []SkillModel{
-					{Name: "Prometheus"},
-					{Name: "Grafana"},
-					{Name: "Zabbix"},
-				},
-			},
-			{
-				Name:   "Soft Skills",
-				Type:   "soft",
-				Skills: []SkillModel{{Name: "Коммуникация"}, {Name: "Презентация задач"}},
 			},
 		},
 	}

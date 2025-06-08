@@ -6,20 +6,21 @@ import (
 	"net/http"
 	"time"
 	"log"
+	"strings"
 
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"gopkg.in/telebot.v4"
 	"github.com/google/uuid"
 )
 
-var messageQuestion = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSql у сотрудника. Уровень указан как 2 по следующей шкале:
+var messageQuestion = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции {skill} у сотрудника. Уровень указан как {level} по шкале от 0 до 5:
 0 — Нет желания изучать
 1 — Нет экспертизы. Не изучал и не применял на практике
 2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
 3 — Хорошая экспертиза. Регулярно применяет на практике
 4 — Эксперт. Знает тонкости, делится лайфхаками
 5 — Гуру. Готов выступать на конференциях
-Построй вопрос так, чтобы он был релевантен именно для уровня 2 и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.
+Построй вопрос так, чтобы он был релевантен именно для уровня {level} и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.
 )`
 
 var messageResult = `Ты выступаешь в роли эксперта, оценивающего уровень профессиональной компетенции по ответу сотрудника.
@@ -45,8 +46,11 @@ var messageResult = `Ты выступаешь в роли эксперта, о�
 Оценка: {0–5}  
 Комментарий: {одно предложение, строго по содержанию ответа}
 Ввод:  
-Ответ сотрудника:  `
+Ответ сотрудника: {answer}`
 // var clientAI integration.Client
+
+var skills = []string{"PostgreSQL", "MySQL/MariaDB", "ClickHouse", "MS SQL", "Redis", "MongoDB"}
+var count = 0
 
 type HandlerFunc func(c telebot.Context) error
 
@@ -54,6 +58,7 @@ type BotWrapper struct {
 	Bot      *telebot.Bot
 	Handlers map[string]HandlerFunc
 	Client   integration.Client
+	UID string
 }
 
 func NewBot(token string) (*BotWrapper, error) {
@@ -73,6 +78,7 @@ func NewBot(token string) (*BotWrapper, error) {
 				"app.cfg.ClientAI.BaseURL",
 				"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
 			),
+		UID: uuid.NewString(),
 	}
 	log.Println(bw.Client)
 	log.Println("test3")
@@ -113,34 +119,30 @@ func (bw *BotWrapper) CommandHandlers() {
 			})
 	})
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
-		uid := uuid.NewString()
-		defer bw.Client.CleanContextRequest(uid)
-		log.Println(bw.Client)
-		log.Println("test2")
-		bw.Client.SendPromptForQuestion(uid, messageQuestion)
-		result := false
-		mes := ""
-		for !result {
-			result, mes = bw.Client.GetResultForQuestionRequest(uid)
-		}
-		
-		return c.Send(mes)
+		defer bw.Client.CleanContextRequest(bw.UID)
+		if count == 6 {
+			return c.Send("Твой общий уровень по БД 2")
+		} 
+		msg, _ := bw.SendQuestion(skills[count], 2)
+		return c.Send(msg)
 	})
 
 	bw.Bot.Handle(telebot.OnText, func(c telebot.Context) error {
-		tmp := fmt.Sprintf("%s\n%s",messageResult,c.Update().Message.Text)
-		uid := uuid.NewString()
-		defer bw.Client.CleanContextRequest(uid)
-		log.Println(bw.Client)
-		log.Println("test2")
-		bw.Client.SendPromptForQuestion(uid, tmp)
+		defer bw.Client.CleanContextRequest(bw.UID)
+		message := strings.ReplaceAll(messageResult, "{answer}", c.Update().Message.Text)
+		log.Println(c.Update().Message.Text)
+		bw.Client.SendPromptForQuestion(bw.UID, message)
 		result := false
 		mes := ""
 		for !result {
-			result, mes = bw.Client.GetResultForQuestionRequest(uid)
+			result, mes = bw.Client.GetResultForQuestionRequest(bw.UID)
 		}
-		
-		return c.Send(mes)
+		if err := c.Send(mes); err != nil {
+			return err
+		}
+
+		msg, _ := bw.SendQuestion(skills[count], 2)
+		return c.Send(msg)
 	})
 
 	// bw.Bot.Handle(telebot.OnAudio, func(c telebot.Context) error {
@@ -159,16 +161,24 @@ func (bw *BotWrapper) CommandHandlers() {
 	// })
 }
 
+func (bw *BotWrapper) SendQuestion(skill string, level int) (string, error) {
+	message := strings.ReplaceAll(messageQuestion,"{skill}", skill)
+	message = strings.ReplaceAll(message, "{level}", fmt.Sprintf("%d", level))
+	bw.Client.SendPromptForQuestion(bw.UID, message)
+	result := false
+	mes := ""
+	for !result {
+		result, mes = bw.Client.GetResultForQuestionRequest(bw.UID)
+	}
+	count++;
+	return mes, nil
+}
+
 func (bw *BotWrapper) Start(ctx context.Context) error {
 	bw.CommandHandlers()
 	errCh := make(chan error, 1)
 
 	go func() {
-		// clientAI = integration.NewClient(
-		// 	&http.Client{Transport: http.DefaultTransport},
-		// 	"app.cfg.ClientAI.BaseURL",
-		// 	"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-		// )
 		bw.Bot.Start()
 	}()
 

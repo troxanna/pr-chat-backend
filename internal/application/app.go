@@ -16,6 +16,7 @@ import (
 	"net"
 	"errors"
 	"github.com/troxanna/pr-chat-backend/internal/db"
+	"log"
 )
 
 type App struct {
@@ -53,9 +54,12 @@ func (app *App) Run() error {
 
 	db, _ := db.NewPostgres(ctx, "10.10.169.1")
 	app.postgresClient = db.Pool
+	fmt.Println(db)
 
 	app.dbCompetencyMatrix = persistence.NewDBCompetencyMatrix(app.postgresClient)
+	fmt.Println(app.dbCompetencyMatrix)
 	app.competencyMatrixService = service.NewCompetencyMatrix(app.dbCompetencyMatrix)
+	fmt.Println(app.competencyMatrixService)
 
 	app.runHTTPServer(ctx, g)
 

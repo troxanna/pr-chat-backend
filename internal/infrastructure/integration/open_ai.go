@@ -114,6 +114,8 @@ func (c Client) SendPromptForQuestion(uid string) {
     }
     req.Header.Set("Content-Type", "application/json")
 
+	log.Println(req)
+
     // Отправка запроса
     resp, err := c.httpClient.Do(req)
     if err != nil {
@@ -155,6 +157,7 @@ func (c Client) GetResultForQuestionRequest(uid string) {
 
     // Отправка запроса
     // client := &http.Client{}
+	log.Println(req)
     resp, err := c.httpClient.Do(req)
     if err != nil {
         panic(err)
@@ -212,6 +215,7 @@ func (c Client) CleanContextRequest(uid string) {
     }
     req.Header.Set("Content-Type", "application/json")
 
+	log.Println(req)
     resp, err := c.httpClient.Do(req)
     if err != nil {
         panic(err)

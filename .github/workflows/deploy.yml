@@ -13,13 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env file (если нужно)
-        run: |
-          echo "HTTP_LISTEN_ADDRESS=${{ secrets.HTTP_LISTEN_ADDRESS }}" > .env
-          echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
-          echo "TG_CERTIFICATE=${{ secrets.TG_CERTIFICATE }}" >> .env
-          echo "TG_KEY=${{ secrets.TG_KEY }}" >> .env
-
       - name: Stop and remove running containers
         run: docker compose down || true
 

@@ -42,7 +42,7 @@ services:
       HTTP_LISTEN_ADDRESS: "${{ secrets.HTTP_LISTEN_ADDRESS }}"
       TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
       TG_CERTIFICATE: "${{ secrets.TG_CERTIFICATE }}"
-      TG_KEY: "$${{ secrets.TG_KEY }}"
+      TG_KEY: "${{ secrets.TG_KEY }}"
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: postgres

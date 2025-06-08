@@ -19,6 +19,7 @@ import (
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/persistence"
 	"golang.org/x/sync/errgroup"
+	"github.com/google/uuid"
 )
 
 type App struct {
@@ -90,9 +91,11 @@ func (app *App) shutdown() {
 func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {
 
 	app.httpServer = app.newHTTPServer(ctx)
-	app.clientAI.SendPromptForQuestion()
-	app.clientAI.GetResultForQuestionRequest()
-	app.clientAI.CleanContextRequest()
+	uid := uuid.NewString()
+	log.Println(uid)
+	app.clientAI.SendPromptForQuestion(uid)
+	app.clientAI.GetResultForQuestionRequest(uid)
+	app.clientAI.CleanContextRequest(uid)
 
 	g.Go(func() error {
 		go func() {

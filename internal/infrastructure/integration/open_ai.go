@@ -6,12 +6,8 @@ import (
 	"bytes"
 	"io"
 	"log"
-	"github.com/google/uuid"
 )
 
-var (
-	uid = uuid.NewString()
-)
 
 type ContextItem struct {
 	RequestMessage  string `json:"requestMessage"`
@@ -82,7 +78,7 @@ type GetResultForQuestionRequest struct {
 }
 
 
-func (c Client) SendPromptForQuestion() {
+func (c Client) SendPromptForQuestion(uid string) {
 	url := "https://gpt.orionsoft.ru/api/External/PostNewRequest"
 	// url := c.baseURL
 
@@ -136,7 +132,7 @@ func (c Client) SendPromptForQuestion() {
 	log.Println("Response:", string(responseData))
 }
 
-func (c Client) GetResultForQuestionRequest() {
+func (c Client) GetResultForQuestionRequest(uid string) {
 	url := "https://gpt.orionsoft.ru/api/External/GetNewResponse"
 
     // Данные запроса
@@ -196,7 +192,7 @@ func (c Client) GetResultForQuestionRequest() {
 
 }
 
-func (c Client) CleanContextRequest() {
+func (c Client) CleanContextRequest(uid string) {
 	url := "https://gpt.orionsoft.ru/api/External/CompleteSession"
 
     // Данные запроса

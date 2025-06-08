@@ -2,7 +2,6 @@ package bot
 
 import (
   "context"
-  "fmt"
   "gopkg.in/telebot.v4"
   "time"
 )
@@ -37,19 +36,12 @@ func (bw *BotWrapper) RegisterHandler(command string, handler HandlerFunc) {
 }
 
 type Competency struct {
-  level     int
+  level     string
   name      string
   Questions map[int][]string
 }
 
 func (bw *BotWrapper) CommandHandlers() {
-  groupCompetency := map[string]Competency{
-    "PostgresSQL": Competency{
-      level:     0,
-      name:      "",
-      Questions: nil,
-    },
-  }
   startButton := telebot.InlineButton{
     Unique: "Start_PR",
     Text:   "Launch Performance Review",
@@ -59,44 +51,18 @@ func (bw *BotWrapper) CommandHandlers() {
       &telebot.ReplyMarkup{
         InlineKeyboard: [][]telebot.InlineButton{
           {startButton},
+          {{
+            Text: "Launch Admin Space",
+            WebApp: &telebot.WebApp{
+              URL: "http://10.10.169.1:8000/employee-competencies",
+            },
+          }},
         },
       })
   })
   bw.Bot.Handle(&startButton, func(c telebot.Context) error {
-    c.Send("Начинаем Performance Review 🎯" + "\nЗаполни карту компетенций")
-    for i, _ := range groupCompetency {
-      c.Send(fmt.Sprintf("Как ты оцениваешь свои знания в %s?", groupCompetency[i].name),
-        &telebot.ReplyMarkup{
-          InlineKeyboard: [][]telebot.InlineButton{
-            {
-              {
-                Unique: "level_1",
-              },
-              {
-                Unique: "level_2",
-              },
-              {
-                Unique: "level_3",
-              },
-              {
-                Unique: "level_4",
-              },
-              {
-                Unique: "level_5",
-              },
-            },
-          },
-        },
-      )
-
-      bw.Bot.Handle("level_1", func(c telebot.Context) error {
-        return nil
-      })
-
-    }
-    return nil
+    return c.Send("Тут должен быть запрос к AI")
   })
-
 }
 
 func (bw *BotWrapper) Start(ctx context.Context) error {

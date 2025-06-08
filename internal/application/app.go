@@ -52,7 +52,10 @@ func (app *App) Run() error {
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	db, _ := db.NewPostgres(ctx, "10.10.169.1")
+	db, err := db.NewPostgres(ctx, "10.10.169.1")
+	if err != nil {
+		log.Fatalf("failed to connect to DB: %v", err)
+	}
 	app.postgresClient = db.Pool
 	log.Println(db)
 

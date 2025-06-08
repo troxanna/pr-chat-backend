@@ -1,13 +1,12 @@
 package integration
 
 import (
-	"net/http"
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"io"
 	"log"
+	"net/http"
 )
-
 
 type ContextItem struct {
 	RequestMessage  string `json:"requestMessage"`
@@ -37,7 +36,6 @@ type FullResponse struct {
 	Data   Data   `json:"data"`
 }
 
-
 type Client struct {
 	httpClient *http.Client
 	baseURL    string
@@ -57,39 +55,38 @@ func NewClient(
 }
 
 type CompleteSessionRequest struct {
-    OperatingSystemCode int    `json:"operatingSystemCode"`
-    APIKey              string `json:"apiKey"`
-    DialogIdentifier    string `json:"dialogIdentifier"`
+	OperatingSystemCode int    `json:"operatingSystemCode"`
+	APIKey              string `json:"apiKey"`
+	DialogIdentifier    string `json:"dialogIdentifier"`
 }
 
 type SendPromptForQuestionRequest struct {
-    OperatingSystemCode int    `json:"operatingSystemCode"`
-    APIKey              string `json:"apiKey"`
-    UserDomainName      string `json:"userDomainName"`
-    DialogIdentifier    string `json:"dialogIdentifier"`
-    AIModelCode         int    `json:"aiModelCode"`
-    Message             string `json:"Message"`
+	OperatingSystemCode int    `json:"operatingSystemCode"`
+	APIKey              string `json:"apiKey"`
+	UserDomainName      string `json:"userDomainName"`
+	DialogIdentifier    string `json:"dialogIdentifier"`
+	AIModelCode         int    `json:"aiModelCode"`
+	Message             string `json:"Message"`
 }
 
 type GetResultForQuestionRequest struct {
-    OperatingSystemCode int    `json:"operatingSystemCode"`
-    APIKey              string `json:"apiKey"`
-    DialogIdentifier    string `json:"dialogIdentifier"`
+	OperatingSystemCode int    `json:"operatingSystemCode"`
+	APIKey              string `json:"apiKey"`
+	DialogIdentifier    string `json:"dialogIdentifier"`
 }
-
 
 func (c Client) SendPromptForQuestion(uid string) {
 	url := "https://gpt.orionsoft.ru/api/External/PostNewRequest"
 	// url := c.baseURL
 
-    // Создаем объект с данными (пока не прикрутим сюда данные от бота)
-    requestData := SendPromptForQuestionRequest{
-        OperatingSystemCode: 12,
-        APIKey:              c.apiKey,
-        UserDomainName:      "Team6QSXgoYCNNsG",
-        DialogIdentifier:    uid,
-        AIModelCode:         1,
-        Message: `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSQL у сотрудника. Уровень указан как 2 по следующей шкале:
+	// Создаем объект с данными (пока не прикрутим сюда данные от бота)
+	requestData := SendPromptForQuestionRequest{
+		OperatingSystemCode: 12,
+		APIKey:              c.apiKey,
+		UserDomainName:      "Team6QSXgoYCNNsG",
+		DialogIdentifier:    uid,
+		AIModelCode:         1,
+		Message: `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSQL у сотрудника. Уровень указан как 2 по следующей шкале:
 
 0 — Нет желания изучать
 1 — Нет экспертизы. Не изучал и не применял на практике
@@ -99,36 +96,36 @@ func (c Client) SendPromptForQuestion(uid string) {
 5 — Гуру. Готов выступать на конференциях
 
 Построй вопрос так, чтобы он был релевантен именно для уровня 3 и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.`,
-    }
+	}
 
-    // Сериализация структуры в JSON
-    jsonData, err := json.Marshal(requestData)
-    if err != nil {
-        panic(err)
-    }
+	// Сериализация структуры в JSON
+	jsonData, err := json.Marshal(requestData)
+	if err != nil {
+		panic(err)
+	}
 
-    // Создание POST-запроса
-    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-    if err != nil {
-        panic(err)
-    }
-    req.Header.Set("Content-Type", "application/json")
+	// Создание POST-запроса
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
 
 	log.Println(req)
 
-    // Отправка запроса
-    resp, err := c.httpClient.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+	// Отправка запроса
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 
-    // Чтение и вывод ответа
+	// Чтение и вывод ответа
 	responseData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}
-	
+
 	log.Println("Status:", resp.Status)
 	log.Println("Response:", string(responseData))
 }
@@ -136,39 +133,41 @@ func (c Client) SendPromptForQuestion(uid string) {
 func (c Client) GetResultForQuestionRequest(uid string) {
 	url := "https://gpt.orionsoft.ru/api/External/GetNewResponse"
 
-    // Данные запроса
-    requestData := GetResultForQuestionRequest{
-        OperatingSystemCode: 12,
-        APIKey:              "OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-        DialogIdentifier:    uid,
-    }
+	// Данные запроса
+	requestData := GetResultForQuestionRequest{
+		OperatingSystemCode: 12,
+		APIKey:              "OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+		DialogIdentifier:    uid,
+	}
 
 	jsonData, err := json.Marshal(requestData)
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
-    // Создание HTTP-запроса
-    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-    if err != nil {
-        panic(err)
-    }
-    req.Header.Set("Content-Type", "application/json")
+	// Создание HTTP-запроса
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
 
-    // Отправка запроса
-    // client := &http.Client{}
+	// Отправка запроса
+	// client := &http.Client{}
 	log.Println(req)
-    resp, err := c.httpClient.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 
-    // Чтение ответа
-    responseData, err := io.ReadAll(resp.Body)
-    if err != nil {
-        panic(err)
-    }
+	// Чтение ответа
+	responseData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Println(responseData)
 
 	var result FullResponse
 
@@ -197,37 +196,37 @@ func (c Client) GetResultForQuestionRequest(uid string) {
 func (c Client) CleanContextRequest(uid string) {
 	url := "https://gpt.orionsoft.ru/api/External/CompleteSession"
 
-    // Данные запроса
-    requestData := CompleteSessionRequest{
-        OperatingSystemCode: 12,
-        APIKey:              "OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-        DialogIdentifier:    uid,
-    }
+	// Данные запроса
+	requestData := CompleteSessionRequest{
+		OperatingSystemCode: 12,
+		APIKey:              "OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+		DialogIdentifier:    uid,
+	}
 
-    jsonData, err := json.Marshal(requestData)
-    if err != nil {
-        panic(err)
-    }
+	jsonData, err := json.Marshal(requestData)
+	if err != nil {
+		panic(err)
+	}
 
-    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-    if err != nil {
-        panic(err)
-    }
-    req.Header.Set("Content-Type", "application/json")
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
 
 	log.Println(req)
-    resp, err := c.httpClient.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 
-    body, err := io.ReadAll(resp.Body)
-    if err != nil {
-        panic(err)
-    }
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Println("Status:", resp.Status)
-    log.Println("Response:", string(body))
+	log.Println("Response:", string(body))
 
 }

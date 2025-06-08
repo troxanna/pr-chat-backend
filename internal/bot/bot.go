@@ -10,27 +10,24 @@ import (
 
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"gopkg.in/telebot.v4"
-	// "github.com/google/uuid"
 )
 
-var messageQuestion = `Сформулируй один открытый вопрос на русскрм языке для собеседования, чтобы оценить уровень компетенции {skill} у сотрудника. Уровень указан как {level} по шкале от 0 до 5:
+const messageQuestionTemplate = `Сформулируй один открытый вопрос на русском языке для собеседования, чтобы оценить уровень компетенции {skill} у сотрудника. Уровень указан как {level} по шкале от 0 до 5:
 0 — Нет желания изучать
 1 — Нет экспертизы. Не изучал и не применял на практике
 2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
 3 — Хорошая экспертиза. Регулярно применяет на практике
 4 — Эксперт. Знает тонкости, делится лайфхаками
 5 — Гуру. Готов выступать на конференциях
-Построй вопрос так, чтобы он был релевантен именно для уровня {level} и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.
-)`
+Построй вопрос так, чтобы он был релевантен именно для уровня {level} и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.`
 
-var messageResult = `Ты выступаешь в роли эксперта, оценивающего уровень профессиональной компетенции по ответу сотрудника.
+const messageResultTemplate = `Ты выступаешь в роли эксперта, оценивающего уровень профессиональной компетенции по ответу сотрудника.
 
 Задача:
 1. Дать оценку по шкале от 0 до 5 (только цифра)
 2. Написать один краткий комментарий на русском языке — **обоснование**, почему именно этот уровень
 
 Оценивай по шкале:
-
 0 — Нет желания изучать  
 1 — Нет экспертизы. Не изучал и не применял  
 2 — Знает теоретически, но практики почти нет  
@@ -42,16 +39,17 @@ var messageResult = `Ты выступаешь в роли эксперта, о�
 - Если нет конкретных действий, инструментов, решений — **не выше 2**
 - Если ответ общий, без примеров — **макс. 2–3**
 - Чтобы получить 4–5, должны быть ясные признаки экспертности и уникальности
+
 Формат вывода:
 Оценка: {0–5}  
 Комментарий: {одно предложение, строго по содержанию ответа}
 Ввод:  
 Ответ сотрудника: {answer}`
 
-// var clientAI integration.Client
-
-var skills = []string{"PostgreSQL", "MySQL/MariaDB", "ClickHouse", "MS SQL", "Redis", "MongoDB"}
-var count = 0
+var (
+	skills = []string{"PostgreSQL", "MySQL/MariaDB", "ClickHouse", "MS SQL", "Redis", "MongoDB"}
+	count  = 0
+)
 
 type HandlerFunc func(c telebot.Context) error
 
@@ -70,19 +68,17 @@ func NewBot(token string) (*BotWrapper, error) {
 		return nil, err
 	}
 
-	bw := &BotWrapper{
+	client := integration.NewClient(
+		&http.Client{Transport: http.DefaultTransport},
+		"app.cfg.ClientAI.BaseURL",
+		"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+	)
+
+	return &BotWrapper{
 		Bot:      bot,
 		Handlers: make(map[string]HandlerFunc),
-		Client: integration.NewClient(
-			&http.Client{Transport: http.DefaultTransport},
-			"app.cfg.ClientAI.BaseURL",
-			"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
-		),
-	}
-	log.Println(bw.Client)
-	log.Println("test3")
-
-	return bw, nil
+		Client:   client,
+	}, nil
 }
 
 func (bw *BotWrapper) RegisterHandler(command string, handler HandlerFunc) {
@@ -90,116 +86,105 @@ func (bw *BotWrapper) RegisterHandler(command string, handler HandlerFunc) {
 	bw.Bot.Handle(command, telebot.HandlerFunc(handler))
 }
 
-type Competency struct {
-	level     string
-	name      string
-	Questions map[int][]string
-}
-
 func (bw *BotWrapper) CommandHandlers() {
-	log.Println(bw.Client)
-	log.Println("test1")
-	startButton := telebot.InlineButton{
-		Unique: "Start_PR",
-		Text:   "Launch Performance Review",
-	}
+	startButton := telebot.InlineButton{Unique: "Start_PR", Text: "Launch Performance Review"}
+	
 	bw.RegisterHandler("/start", func(c telebot.Context) error {
-		return c.Send("Добро пожаловать, для того чтобы начать Performance Review",
-			&telebot.ReplyMarkup{
-				InlineKeyboard: [][]telebot.InlineButton{
-					{startButton},
-					{{
-						Text: "Launch Admin Space",
-						URL:  "http://10.10.169.1:8000/employee-competencies",
-					}},
-				},
-			})
+		markup := &telebot.ReplyMarkup{
+			InlineKeyboard: [][]telebot.InlineButton{
+				{startButton},
+				{{Text: "Launch Admin Space", URL: "http://10.10.169.1:8000/employee-competencies"}},
+			},
+		}
+		return c.Send("Добро пожаловать, для того чтобы начать Performance Review", markup)
 	})
+
 	bw.Bot.Handle(&startButton, func(c telebot.Context) error {
-		idUser := c.Chat().ID
-		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
-		msg, _ := bw.SendQuestion(2, idUser)
+		userID := c.Chat().ID
+		// defer bw.Client.CleanContextRequest(userID)
+		msg, _ := bw.SendQuestion(2, userID)
 		return c.Send(msg)
 	})
 
 	bw.Bot.Handle(telebot.OnText, func(c telebot.Context) error {
-		idUser := c.Chat().ID
-		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
-		message := strings.ReplaceAll(messageResult, "{answer}", c.Update().Message.Text)
-		log.Println(c.Update().Message.Text)
-		bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", idUser), message)
-		result := false
-		mes := ""
-		for !result {
-			result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", idUser))
+		userID := fmt.Sprintf("%d", c.Chat().ID)
+		// defer bw.Client.CleanContextRequest(userID)
+
+		answer := c.Text()
+		message := strings.ReplaceAll(messageResultTemplate, "{answer}", answer)
+		bw.Client.SendPromptForQuestion(userID, message)
+
+		var result string
+		for ok := false; !ok; {
+			ok, result = bw.Client.GetResultForQuestionRequest(userID)
 		}
-		if err := c.Send(mes); err != nil {
+
+		if err := c.Send(result); err != nil {
 			return err
 		}
-		msg, _ := bw.SendQuestion(2, idUser)
+		msg, _ := bw.SendQuestion(2, c.Chat().ID)
 		return c.Send(msg)
 	})
 
 	bw.RegisterHandler(telebot.OnVoice, func(c telebot.Context) error {
-		fmt.Println("voice Detect")
 		voice := c.Message().Voice
-
 		reader, err := bw.Bot.File(voice.MediaFile())
 		if err != nil {
 			log.Printf("Не удалось получить файл: %v", err)
 			return c.Send("Произошла ошибка при получении голосового сообщения.")
 		}
 		defer reader.Close()
-		fmt.Println("voice sending")
+
 		answ, err := sendVoiceInWhisper(reader, voice.FileID+".ogg")
 		if err != nil {
 			log.Printf("Ошибка отправки на сервис: %v", err)
 			return c.Send("Ошибка при отправке голосового сообщения.")
 		}
-		idUser := c.Chat().ID
-		message := strings.ReplaceAll(messageResult, "{answer}", answ)
-		bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", idUser), message)
-		result := false
-		mes := ""
-		for !result {
-			result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", idUser))
+
+		userID := fmt.Sprintf("%d", c.Chat().ID)
+		// defer bw.Client.CleanContextRequest(userID)
+
+		message := strings.ReplaceAll(messageResultTemplate, "{answer}", answ)
+		bw.Client.SendPromptForQuestion(userID, message)
+
+		var result string
+		for ok := false; !ok; {
+			ok, result = bw.Client.GetResultForQuestionRequest(userID)
 		}
+
 		if err := c.Send(answ); err != nil {
 			return err
 		}
-		if err := c.Send(mes); err != nil {
+		if err := c.Send(result); err != nil {
 			return err
 		}
-		defer bw.Client.CleanContextRequest(fmt.Sprintf("%d", idUser))
-		msg, _ := bw.SendQuestion(2, idUser)
+		msg, _ := bw.SendQuestion(2, c.Chat().ID)
 		return c.Send(msg)
 	})
 }
 
 func (bw *BotWrapper) SendQuestion(level int, userId int64) (string, error) {
-	if count == 6 {
+	if count == len(skills) {
 		count = 0
+        bw.Client.CleanContextRequest(fmt.Sprintf("%d", userId))
 		return "Твой уровень по группе компетенций Базы данных: 3.2", nil
 	}
-	message := strings.ReplaceAll(messageQuestion, "{skill}", skills[count])
+	message := strings.ReplaceAll(messageQuestionTemplate, "{skill}", skills[count])
 	message = strings.ReplaceAll(message, "{level}", fmt.Sprintf("%d", level))
 	bw.Client.SendPromptForQuestion(fmt.Sprintf("%d", userId), message)
-	result := false
-	mes := ""
-	for !result {
-		result, mes = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", userId))
+
+	var result string
+	for ok := false; !ok; {
+		ok, result = bw.Client.GetResultForQuestionRequest(fmt.Sprintf("%d", userId))
 	}
 	count++
-	return mes, nil
+	return result, nil
 }
 
 func (bw *BotWrapper) Start(ctx context.Context) error {
 	bw.CommandHandlers()
 	errCh := make(chan error, 1)
-
-	go func() {
-		bw.Bot.Start()
-	}()
+	go bw.Bot.Start()
 
 	select {
 	case <-ctx.Done():

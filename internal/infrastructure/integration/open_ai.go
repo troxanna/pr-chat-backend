@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-	var messageQuestion = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции «{x}» у сотрудника. Уровень указан как {level} по следующей шкале:
+var messageQuestion = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции «{x}» у сотрудника. Уровень указан как {level} по следующей шкале:
 0 — Нет желания изучать
 1 — Нет экспертизы. Не изучал и не применял на практике
 2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
@@ -107,7 +107,7 @@ func (c Client) SendPromptForQuestion(uid string) {
 		UserDomainName:      "Team6QSXgoYCNNsG",
 		DialogIdentifier:    uid,
 		AIModelCode:         1,
-		Message: messageQuestion, //messageResult
+		Message:             messageQuestion, //messageResult
 	}
 
 	// Сериализация структуры в JSON
@@ -140,7 +140,7 @@ func (c Client) SendPromptForQuestion(uid string) {
 	log.Println("Response:", string(responseData))
 }
 
-func (c Client) GetResultForQuestionRequest(uid string) bool {
+func (c Client) GetResultForQuestionRequest(uid string) (bool, string) {
 	url := "https://gpt.orionsoft.ru/api/External/GetNewResponse"
 
 	// Данные запроса
@@ -181,11 +181,11 @@ func (c Client) GetResultForQuestionRequest(uid string) bool {
 	if err := json.Unmarshal(responseData, &result); err != nil {
 		log.Printf("Ошибка разбора JSON: %v", err)
 		log.Println("Сырой ответ:", string(responseData))
-		return false
+		return false, ""
 	}
 
 	if result.Data.LastMessage == "" {
-		return false
+		return false, ""
 	}
 
 	log.Println("✅ Успешность:", result.Status.IsSuccess)
@@ -201,7 +201,7 @@ func (c Client) GetResultForQuestionRequest(uid string) bool {
 		log.Printf("  [%d] ▶️ Запрос (%s): %s", i+1, item.RequestTime, item.RequestMessage)
 		log.Printf("      💬 Ответ  (%s): %s", item.ResponseTime, item.ResponseMessage)
 	}
-	return true
+	return true, result.Data.LastMessage
 
 }
 

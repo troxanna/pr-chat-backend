@@ -39,10 +39,10 @@ services:
       - "8697:8697"
     restart: unless-stopped
     environment:
-      HTTP_LISTEN_ADDRESS: "${HTTP_LISTEN_ADDRESS}"
-      TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN}"
-      TG_CERTIFICATE: "${TG_CERTIFICATE}"
-      TG_KEY: "${TG_KEY}"
+      HTTP_LISTEN_ADDRESS: "${{ secrets.HTTP_LISTEN_ADDRESS }}"
+      TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
+      TG_CERTIFICATE: "${{ secrets.TG_CERTIFICATE }}"
+      TG_KEY: "$${{ secrets.TG_KEY }}"
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: postgres

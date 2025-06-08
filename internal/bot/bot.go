@@ -2,52 +2,65 @@ package bot
 
 import (
 	"context"
-	"fmt"
-	"github.com/troxanna/pr-chat-backend/internal/config"
-	"log"
-
-	"github.com/gin-gonic/gin"
-	tele "gopkg.in/telebot.v4"
+	"gopkg.in/telebot.v4"
+	"time"
 )
 
-func StartBot(ctx context.Context, cfg *config.Config, router *gin.Engine) error {
-	webhook := &tele.Webhook{
-		Endpoint: &tele.WebhookEndpoint{
-			PublicURL: cfg.Telegram.WebhookUrl,
-			Cert:      cfg.Telegram.Cert,
-		},
-	}
+type HandlerFunc func(c telebot.Context) error
 
-	bot, err := tele.NewBot(tele.Settings{
-		Token:     cfg.Telegram.BotToken,
-		Poller:    webhook,
-		ParseMode: tele.ModeHTML,
-		Verbose:   true,
+type BotWrapper struct {
+	Bot      *telebot.Bot
+	Handlers map[string]HandlerFunc
+}
+
+func NewBot(token string) (*BotWrapper, error) {
+	bot, err := telebot.NewBot(telebot.Settings{
+		Token:  token,
+		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	bot.Handle("/start", func(c tele.Context) error {
-		return c.Send("Привет, для того чтобы начать Performance Review Нажми на кнопку Launch PR", tele.ReplyMarkup{
-			InlineKeyboard: [][]tele.InlineButton{
-				{{
-					Text: "Launch Bot",
-					URL:  fmt.Sprintf("%s+%s", cfg.HTTP.ListenAddress, "/webhook"),
-				}},
-			},
-		})
+	bw := &BotWrapper{
+		Bot:      bot,
+		Handlers: make(map[string]HandlerFunc),
+	}
+
+	return bw, nil
+}
+
+func (bw *BotWrapper) RegisterHandler(command string, handler HandlerFunc) {
+	bw.Handlers[command] = handler
+	bw.Bot.Handle(command, telebot.HandlerFunc(handler))
+}
+
+func (bw *BotWrapper) CommandHandlers() {
+	bw.RegisterHandler("/start", func(c telebot.Context) error {
+		return c.Send("Добро пожаловать, для того чтобы начать Performance Review",
+			&telebot.ReplyMarkup{
+				InlineKeyboard: [][]telebot.InlineButton{
+					{{
+						Text:   "Launch Performance Review",
+						WebApp: &telebot.WebApp{URL: "https://www.appsmith.com/"},
+					}},
+				},
+			})
 	})
+}
 
-	router.POST("/webhook", func(c *gin.Context) {
-		webhook.ServeHTTP(c.Writer, c.Request)
-	})
-	go bot.Start()
+func (bw *BotWrapper) Start(ctx context.Context) error {
+	bw.CommandHandlers()
+	errCh := make(chan error, 1)
 
-	<-ctx.Done()
+	go func() {
+		bw.Bot.Start()
+	}()
 
-	log.Println("Shutting down bot...")
-
-	bot.Stop()
-	return nil
+	select {
+	case <-ctx.Done():
+		return nil
+	case err := <-errCh:
+		return err
+	}
 }

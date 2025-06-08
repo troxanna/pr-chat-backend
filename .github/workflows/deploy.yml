@@ -40,6 +40,18 @@ jobs:
             -p 5432:5432 \
             postgres:15
 
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..20}; do
+            if docker exec pg-db pg_isready -U postgres > /dev/null 2>&1; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "PostgreSQL not ready yet, waiting..."
+            sleep 2
+          done
+
       - name: Run app container
         run: |
           docker run -d \

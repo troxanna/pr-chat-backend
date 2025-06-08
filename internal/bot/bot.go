@@ -47,10 +47,14 @@ const messageResultTemplate = `Ты выступаешь в роли экспе�
 Ответ сотрудника: {answer}`
 
 
-//ура
+// type Chat struct {
+// 	ID string
+// 	count int
+// }
+
 var (
 	skills = []string{"PostgreSQL", "MySQL/MariaDB", "ClickHouse", "MS SQL", "Redis", "MongoDB"}
-	count  = 0
+	count = 0
 )
 
 type HandlerFunc func(c telebot.Context) error

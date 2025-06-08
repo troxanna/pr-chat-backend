@@ -1,73 +1,30 @@
-name: Build and Run App with PostgreSQL
+name: Deploy to Localhost
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  docker:
+  deploy:
     runs-on: self-hosted
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker image
-        run: docker build -t pr-chat-bot -f .docker/Dockerfile .
-
-      - name: Stop and remove old containers
-        continue-on-error: true
+      - name: Create .env file (если нужно)
         run: |
-          docker rm -f pr-chat-bot || true
-          docker rm -f pg-db || true
+          echo "HTTP_LISTEN_ADDRESS=${{ secrets.HTTP_LISTEN_ADDRESS }}" > .env
+          echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
+          echo "TG_CERTIFICATE=${{ secrets.TG_CERTIFICATE }}" >> .env
+          echo "TG_KEY=${{ secrets.TG_KEY }}" >> .env
 
-      - name: Create Docker network
-        run: docker network create pr-chat-net || true
+      - name: Stop and remove running containers
+        run: docker compose down || true
 
-      - name: Run PostgreSQL container
-        run: |
-          docker run -d \
-            --name pg-db \
-            --network pr-chat-net \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=postgres \
-            -e POSTGRES_DB=app_db \
-            -p 5432:5432 \
-            postgres:15
+      - name: Build and start containers
+        run: docker compose up -d --build
 
-      - name: Wait for PostgreSQL
-        run: |
-          echo "Waiting for PostgreSQL to be ready..."
-          for i in {1..20}; do
-            if docker exec pg-db pg_isready -U postgres > /dev/null 2>&1; then
-              echo "PostgreSQL is ready!"
-              break
-            fi
-            echo "PostgreSQL not ready yet, waiting..."
-            sleep 2
-          done
-
-      - name: Run app container
-        run: |
-          docker run -d \
-            --name pr-chat-bot \
-            --network pr-chat-net \
-            -p 8080:8080 \
-            -p 8697:8697 \
-            -e HTTP_LISTEN_ADDRESS=${{ secrets.HTTP_LISTEN_ADDRESS }} \
-            -e JWT_PRIVATE_KEY="${{ secrets.JWT_PRIVATE_KEY }}" \
-            -e JWT_PUBLIC_KEY="${{ secrets.JWT_PUBLIC_KEY }}" \
-            -e TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} \
-            -e TG_CERTIFICATE="${{ secrets.TG_CERTIFICATE }}" \
-            -e TG_KEY="${{ secrets.TG_KEY }}" \
-            -e DB_HOST=pg-db \
-            -e DB_PORT=5432 \
-            -e DB_USER=postgres \
-            -e DB_PASSWORD=postgres \
-            -e DB_NAME=app_db \
-            pr-chat-bot
+      - name: Show running containers
+        run: docker ps

@@ -130,7 +130,7 @@ func (c Client) SendPromptForQuestion(uid string) {
 	log.Println("Response:", string(responseData))
 }
 
-func (c Client) GetResultForQuestionRequest(uid string) {
+func (c Client) GetResultForQuestionRequest(uid string) bool {
 	url := "https://gpt.orionsoft.ru/api/External/GetNewResponse"
 
 	// Данные запроса
@@ -174,7 +174,11 @@ func (c Client) GetResultForQuestionRequest(uid string) {
 	if err := json.Unmarshal(responseData, &result); err != nil {
 		log.Printf("Ошибка разбора JSON: %v", err)
 		log.Println("Сырой ответ:", string(responseData))
-		return
+		return false
+	}
+
+	if result.Data.LastMessage == "" {
+		return false
 	}
 
 	log.Println("✅ Успешность:", result.Status.IsSuccess)
@@ -190,6 +194,7 @@ func (c Client) GetResultForQuestionRequest(uid string) {
 		log.Printf("  [%d] ▶️ Запрос (%s): %s", i+1, item.RequestTime, item.RequestMessage)
 		log.Printf("      💬 Ответ  (%s): %s", item.ResponseTime, item.ResponseMessage)
 	}
+	return true
 
 }
 

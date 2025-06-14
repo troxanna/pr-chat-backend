@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env file (если нужно)
+      - name: Create .env file
         run: |
           echo "HTTP_LISTEN_ADDRESS=${{ secrets.HTTP_LISTEN_ADDRESS }}" > .env
           echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env

@@ -76,7 +76,7 @@ func (app *App) Run() error {
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	db, err := db.NewPostgres(ctx, "host=pg-db port=5432 user=postgres password=postgres dbname=app_db sslmode=disable")
+	db, err := db.NewPostgres(ctx, app.cfg.Postgres.DSN)
 	if err != nil {
 		log.Fatalf("failed to connect to DB: %v", err)
 	}
@@ -153,7 +153,7 @@ func (app *App) newHTTPServer(ctx context.Context) *http.Server {
 	rest.RegisterRoutes(router, admServer)
 
 	return &http.Server{ //nolint:exhaustruct
-		Addr:              app.cfg.HTTP.ListenAddressPrivate,
+		Addr:              app.cfg.HTTP.ListenAddressAdmin,
 		WriteTimeout:      app.cfg.HTTP.WriteTimeout,
 		ReadTimeout:       app.cfg.HTTP.ReadTimeout,
 		ReadHeaderTimeout: app.cfg.HTTP.ReadTimeout,

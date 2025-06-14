@@ -39,7 +39,8 @@ services:
     environment:
       HTTP_LISTEN_ADDRESS: "${HTTP_LISTEN_ADDRESS}"
       TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN}"
-      DB_HOST: db
+      PG_DSN: "${PG_DSN}"
+      DB_HOST: pg-db
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres

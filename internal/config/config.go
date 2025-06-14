@@ -23,8 +23,8 @@ type Config struct {
 	// }
 
 	HTTP struct {
-		ListenAddress        string        `env:"HTTP_LISTEN_ADDRESS,notEmpty"`
-		ListenAddressPrivate string        `env:"HTTP_LISTEN_ADDRESS_PRIVATE" envDefault:"0.0.0.0:8080"`
+		ListenAddressBot        string        `env:"HTTP_LISTEN_ADDRESS_BOT" envDefault:"0.0.0.0:8697"`
+		ListenAddressAdmin string        `env:"HTTP_LISTEN_ADDRESS_ADMIN" envDefault:"0.0.0.0:8080"`
 		WriteTimeout         time.Duration `env:"HTTP_WRITE_TIMEOUT" envDefault:"90s"`
 		ReadTimeout          time.Duration `env:"HTTP_READ_TIMEOUT" envDefault:"90s"`
 		IdleTimeout          time.Duration `env:"HTTP_IDLE_TIMEOUT" envDefault:"60s"`
@@ -38,13 +38,12 @@ type Config struct {
 	// 	RefreshTokenTTL time.Duration `env:"JWT_REFRESH_TOKEN_TTL" envDefault:"168h"`
 	// }
 
-	// Postgres struct {
-	// 	URL             string        `env:"PG_URL, notEmpty"`
-	// 	DSN             string        `env:"PG_DSN,notEmpty" json:"-"` // Hide in zap logs
-	// 	MaxIdleConns    int           `env:"PG_MAX_IDLE_CONNS" envDefault:"15"`
-	// 	MaxOpenConns    int           `env:"PG_MAX_OPEN_CONNS" envDefault:"15"`
-	// 	ConnMaxLifetime time.Duration `env:"PG_CONN_MAX_LIFETIME" envDefault:"5m"`
-	// }
+	Postgres struct {
+		DSN             string        `env:"PG_DSN,notEmpty" json:"-"` // Hide in zap logs
+		MaxIdleConns    int           `env:"PG_MAX_IDLE_CONNS" envDefault:"15"`
+		MaxOpenConns    int           `env:"PG_MAX_OPEN_CONNS" envDefault:"15"`
+		ConnMaxLifetime time.Duration `env:"PG_CONN_MAX_LIFETIME" envDefault:"5m"`
+	}
 
 	Log struct {
 		FieldMaxLen int `env:"LOG_FIELD_MAX_LEN" envDefault:"2000"`

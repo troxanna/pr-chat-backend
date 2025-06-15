@@ -40,6 +40,8 @@ services:
       HTTP_LISTEN_ADDRESS: "${HTTP_LISTEN_ADDRESS}"
       TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN}"
       PG_DSN: "${PG_DSN}"
+      AI_URL: "${AI_URL}"
+      AI_KEY: "${AI_KEY}"
       DB_HOST: pg-db
       DB_PORT: 5432
       DB_USER: postgres

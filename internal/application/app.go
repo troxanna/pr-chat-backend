@@ -15,6 +15,7 @@ import (
 	"github.com/troxanna/pr-chat-backend/internal/application/rest"
 	"github.com/troxanna/pr-chat-backend/internal/config"
 	"github.com/troxanna/pr-chat-backend/pkg/openai"
+	"github.com/troxanna/pr-chat-backend/pkg/bot"
 	// "github.com/troxanna/pr-chat-backend/internal/db"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/troxanna/pr-chat-backend/internal/domain/services"
@@ -24,14 +25,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const messageQuestionTemplate = `Сформулируй один открытый вопрос на русском языке для собеседования, чтобы оценить уровень компетенции PostgreSQL у сотрудника. Уровень указан как 2 по шкале от 0 до 5:
+const messageQuestionTemplate = `Сформулируй один открытый вопрос на русском языке для собеседования, чтобы оценить уровень компетенции REST API у сотрудника. Уровень указан как 2 по шкале от 0 до 5:
 0 — Нет желания изучать
 1 — Нет экспертизы. Не изучал и не применял на практике
 2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
 3 — Хорошая экспертиза. Регулярно применяет на практике
 4 — Эксперт. Знает тонкости, делится лайфхаками
 5 — Гуру. Готов выступать на конференциях
-Построй вопрос так, чтобы он был релевантен именно для уровня {level} и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.`
+Построй вопрос так, чтобы он был релевантен именно для уровня 2 и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.`
 
 
 type App struct {
@@ -41,6 +42,7 @@ type App struct {
 	deferred       []func()
 	postgresClient *sqlx.DB
 	clientAI       integration.ChatGPTService
+	clientBot 		integration.TelegramBotService
 
 	dbCompetencyMatrix      persistence.DBCompetencyMatrix
 	competencyMatrixService *service.CompetencyMatrix
@@ -78,13 +80,6 @@ func (app *App) Run() error {
 
 	app.postgresClient = postgresClient
 
-	// db, err := db.NewPostgres(ctx, app.cfg.Postgres.DSN)
-	// if err != nil {
-	// 	log.Fatalf("failed to connect to DB: %v", err)
-	// }
-	// app.postgresClient = db.Pool
-	// log.Println(db)
-
 	gptClient := openai.NewClient(
 		&http.Client{Transport: http.DefaultTransport},
 		app.cfg.ClientAI.BaseURL,
@@ -101,6 +96,7 @@ func (app *App) Run() error {
 	app.dbCompetencyMatrix = persistence.NewDBCompetencyMatrix(app.postgresClient)
 	app.competencyMatrixService = service.NewCompetencyMatrix(app.dbCompetencyMatrix)
 
+	app.runPollingBot(ctx)
 	app.runHTTPServer(ctx, g)
 
 	if err := g.Wait(); err != nil {
@@ -114,6 +110,20 @@ func (app *App) shutdown() {
 	for _, fn := range app.deferred {
 		fn()
 	}
+}
+
+func (app *App) runPollingBot(ctx context.Context) {
+	botClient, err := bot.NewClient(app.cfg.Telegram.BotToken)
+	if err != nil {
+		log.Fatalf("bot exited with error: %v", err)
+	}
+	app.clientBot = integration.NewTelegramBotService(botClient)
+	log.Println("Telegram bot started...")
+	go func() {
+        if err := app.clientBot.Start(ctx); err != nil {
+            log.Printf("Telegram bot error: %v", err)
+        }
+    }()
 }
 
 func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {

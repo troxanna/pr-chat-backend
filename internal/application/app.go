@@ -16,6 +16,7 @@ import (
 	"github.com/troxanna/pr-chat-backend/internal/config"
 	"github.com/troxanna/pr-chat-backend/pkg/openai"
 	// "github.com/troxanna/pr-chat-backend/internal/db"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/troxanna/pr-chat-backend/internal/domain/services"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/persistence"

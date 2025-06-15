@@ -14,34 +14,23 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/troxanna/pr-chat-backend/internal/application/rest"
 	"github.com/troxanna/pr-chat-backend/internal/config"
+	"github.com/troxanna/pr-chat-backend/pkg/openai"
 	"github.com/troxanna/pr-chat-backend/internal/db"
 	"github.com/troxanna/pr-chat-backend/internal/domain/services"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/persistence"
 	"golang.org/x/sync/errgroup"
-	"github.com/google/uuid"
 )
 
-var messageQuestion = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSql у сотрудника. Уровень указан как 2 по следующей шкале:
+const messageQuestionTemplate = `Сформулируй один открытый вопрос на русском языке для собеседования, чтобы оценить уровень компетенции PostgreSQL у сотрудника. Уровень указан как 2 по шкале от 0 до 5:
 0 — Нет желания изучать
 1 — Нет экспертизы. Не изучал и не применял на практике
 2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
 3 — Хорошая экспертиза. Регулярно применяет на практике
 4 — Эксперт. Знает тонкости, делится лайфхаками
 5 — Гуру. Готов выступать на конференциях
-Построй вопрос так, чтобы он был релевантен именно для уровня 2 и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.
-)`
+Построй вопрос так, чтобы он был релевантен именно для уровня {level} и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.`
 
-var messageResult = `Сформулируй один открытый вопрос для собеседования, чтобы оценить уровень компетенции PosgreSQL у сотрудника. Уровень указан как 2 по следующей шкале:
-
-0 — Нет желания изучать
-1 — Нет экспертизы. Не изучал и не применял на практике
-2 — Средняя экспертиза. Изучал самостоятельно, практики было мало
-3 — Хорошая экспертиза. Регулярно применяет на практике
-4 — Эксперт. Знает тонкости, делится лайфхаками
-5 — Гуру. Готов выступать на конференциях
-
-Построй вопрос так, чтобы он был релевантен именно для уровня 3 и позволял раскрыть глубину знаний сотрудника. Используй профессиональный стиль.`
 
 type App struct {
 	name           string
@@ -49,7 +38,7 @@ type App struct {
 	cfg            config.Config
 	deferred       []func()
 	postgresClient *pgxpool.Pool
-	clientAI       integration.Client
+	clientAI       integration.ChatGPTService
 
 	dbCompetencyMatrix      persistence.DBCompetencyMatrix
 	competencyMatrixService *service.CompetencyMatrix
@@ -83,16 +72,21 @@ func (app *App) Run() error {
 	app.postgresClient = db.Pool
 	log.Println(db)
 
-	app.clientAI = integration.NewClient(
+	gptClient := openai.NewClient(
 		&http.Client{Transport: http.DefaultTransport},
-		"app.cfg.ClientAI.BaseURL",
-		"OrVrQoQ6T43vk0McGmHOsdvvTiX446RJ",
+		app.cfg.ClientAI.BaseURL,
+		app.cfg.ClientAI.APIKey,
 	)
+	gptService := integration.NewChatGPTService(gptClient, "gpt-4")
+
+	result, err := gptService.AskUser(ctx, messageQuestionTemplate)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(result)
 
 	app.dbCompetencyMatrix = persistence.NewDBCompetencyMatrix(app.postgresClient)
-	log.Println(app.dbCompetencyMatrix)
 	app.competencyMatrixService = service.NewCompetencyMatrix(app.dbCompetencyMatrix)
-	log.Println(app.competencyMatrixService)
 
 	app.runHTTPServer(ctx, g)
 
@@ -110,16 +104,7 @@ func (app *App) shutdown() {
 }
 
 func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {
-
 	app.httpServer = app.newHTTPServer(ctx)
-	uid := uuid.NewString()
-	result := false
-	log.Println(uid)
-	app.clientAI.SendPromptForQuestion(uid, messageQuestion)
-	for !result {
-		result, _ = app.clientAI.GetResultForQuestionRequest(uid)
-	} 
-	app.clientAI.CleanContextRequest(uid)
 
 	g.Go(func() error {
 		go func() {

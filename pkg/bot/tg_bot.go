@@ -33,3 +33,7 @@ func (c *Client) SendMessage(chatID int64, text string) error {
 	_, err := c.api.Send(msg)
 	return err
 }
+
+func (c *Client) API() *tgbotapi.BotAPI {
+	return c.api
+}

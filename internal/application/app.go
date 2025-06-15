@@ -77,7 +77,7 @@ func (app *App) Run() error {
 		app.cfg.ClientAI.BaseURL,
 		app.cfg.ClientAI.APIKey,
 	)
-	gptService := integration.NewChatGPTService(gptClient, "gpt-4")
+	gptService := integration.NewChatGPTService(gptClient, "gpt-3.5-turbo")
 
 	result, err := gptService.AskUser(ctx, messageQuestionTemplate)
 	if err != nil {

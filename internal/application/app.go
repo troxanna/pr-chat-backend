@@ -11,15 +11,16 @@ import (
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	// "github.com/jackc/pgx/v5/pgxpool"
 	"github.com/troxanna/pr-chat-backend/internal/application/rest"
 	"github.com/troxanna/pr-chat-backend/internal/config"
 	"github.com/troxanna/pr-chat-backend/pkg/openai"
-	"github.com/troxanna/pr-chat-backend/internal/db"
+	// "github.com/troxanna/pr-chat-backend/internal/db"
 	"github.com/troxanna/pr-chat-backend/internal/domain/services"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/integration"
 	"github.com/troxanna/pr-chat-backend/internal/infrastructure/persistence"
 	"golang.org/x/sync/errgroup"
+	"github.com/jmoiron/sqlx"
 )
 
 const messageQuestionTemplate = `Сформулируй один открытый вопрос на русском языке для собеседования, чтобы оценить уровень компетенции PostgreSQL у сотрудника. Уровень указан как 2 по шкале от 0 до 5:
@@ -37,7 +38,7 @@ type App struct {
 	httpServer     *http.Server
 	cfg            config.Config
 	deferred       []func()
-	postgresClient *pgxpool.Pool
+	postgresClient *sqlx.DB
 	clientAI       integration.ChatGPTService
 
 	dbCompetencyMatrix      persistence.DBCompetencyMatrix
@@ -65,12 +66,23 @@ func (app *App) Run() error {
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	db, err := db.NewPostgres(ctx, app.cfg.Postgres.DSN)
+	postgresClient, err := sqlx.ConnectContext(ctx, "pgx", app.cfg.Postgres.DSN)
 	if err != nil {
-		log.Fatalf("failed to connect to DB: %v", err)
+		return fmt.Errorf("sqlx.ConnectContext: %w", err)
 	}
-	app.postgresClient = db.Pool
-	log.Println(db)
+
+	postgresClient.SetMaxOpenConns(app.cfg.Postgres.MaxOpenConns)
+	postgresClient.SetMaxIdleConns(app.cfg.Postgres.MaxIdleConns)
+	postgresClient.SetConnMaxLifetime(app.cfg.Postgres.ConnMaxLifetime)
+
+	app.postgresClient = postgresClient
+
+	// db, err := db.NewPostgres(ctx, app.cfg.Postgres.DSN)
+	// if err != nil {
+	// 	log.Fatalf("failed to connect to DB: %v", err)
+	// }
+	// app.postgresClient = db.Pool
+	// log.Println(db)
 
 	gptClient := openai.NewClient(
 		&http.Client{Transport: http.DefaultTransport},

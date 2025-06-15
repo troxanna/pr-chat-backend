@@ -4,15 +4,15 @@ import (
 	"context"
 	"log"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/troxanna/pr-chat-backend/internal/domain/entity"
+	"github.com/jmoiron/sqlx"
 )
 
 type DBCompetencyMatrix struct {
-	db *pgxpool.Pool
+	db *sqlx.DB
 }
 
-func NewDBCompetencyMatrix(db *pgxpool.Pool) DBCompetencyMatrix { return DBCompetencyMatrix{db: db} }
+func NewDBCompetencyMatrix(db *sqlx.DB) DBCompetencyMatrix { return DBCompetencyMatrix{db: db} }
 
 func (p DBCompetencyMatrix) CreateCompetencyMatrix(ctx context.Context, groups []entity.GroupSkills, skills []entity.Skill, matrix entity.Matrix) error {
 	log.Println(groups)
